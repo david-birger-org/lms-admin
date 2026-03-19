@@ -6,7 +6,10 @@ import {
   normalizeStatementRows,
   type StatementItem,
 } from "@/lib/monobank";
-import { getLmsSlsConfig } from "@/lib/server/lms-sls";
+import {
+  getCurrentRequestAuthHeaders,
+  getLmsSlsConfig,
+} from "@/lib/server/lms-sls";
 
 interface StatementResponse {
   list?: StatementItem[];
@@ -19,6 +22,7 @@ export async function getMonobankStatement(
   days = DEFAULT_STATEMENT_DAYS,
 ): Promise<MonobankStatementSnapshot> {
   const { apiKey, baseUrl } = getLmsSlsConfig();
+  const authHeaders = await getCurrentRequestAuthHeaders();
   const targetUrl = new URL("api/monobank/statement", baseUrl);
 
   targetUrl.searchParams.set("days", String(days));
@@ -26,6 +30,12 @@ export async function getMonobankStatement(
   const response = await fetch(targetUrl, {
     headers: {
       "x-internal-api-key": apiKey,
+      ...(authHeaders.get("authorization")
+        ? { authorization: authHeaders.get("authorization") as string }
+        : {}),
+      ...(authHeaders.get("cookie")
+        ? { cookie: authHeaders.get("cookie") as string }
+        : {}),
     },
     cache: "no-store",
   });

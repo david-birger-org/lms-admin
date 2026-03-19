@@ -3,6 +3,16 @@ import { NextResponse } from "next/server";
 import { requireAdminApiAccess } from "@/lib/auth/admin-server";
 import { forwardLmsSlsRequest } from "@/lib/server/lms-sls";
 
+function getAppUserId(privateMetadata: unknown) {
+  if (!privateMetadata || typeof privateMetadata !== "object") {
+    return null;
+  }
+
+  const userId = Reflect.get(privateMetadata, "userId");
+
+  return typeof userId === "string" ? userId.trim() || null : null;
+}
+
 export async function POST(request: Request) {
   const access = await requireAdminApiAccess({ includeUser: true });
 
@@ -26,6 +36,7 @@ export async function POST(request: Request) {
     return await forwardLmsSlsRequest({
       body: JSON.stringify({
         ...body,
+        appUserId: getAppUserId(access.user?.privateMetadata),
         clerkUserId: access.userId,
         customerEmail: access.user?.primaryEmailAddress?.emailAddress ?? null,
       }),
