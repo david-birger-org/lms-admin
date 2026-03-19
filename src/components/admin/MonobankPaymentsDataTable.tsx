@@ -73,9 +73,20 @@ export function MonobankPaymentsDataTable({
     );
   }, [data, selectedStatuses]);
 
+  const pageResetKey = React.useMemo(
+    () =>
+      [
+        String(filteredData.length),
+        ...sorting.map(({ id, desc }) => `${id}:${desc ? "desc" : "asc"}`),
+        ...columnFilters.map(({ id, value }) => `${id}:${String(value)}`),
+      ].join("|"),
+    [columnFilters, filteredData.length, sorting],
+  );
+
   const table = useReactTable({
     data: filteredData,
     columns: monobankPaymentsColumns,
+    autoResetPageIndex: false,
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
     getCoreRowModel: getCoreRowModel(),
@@ -91,6 +102,14 @@ export function MonobankPaymentsDataTable({
       rowSelection,
     },
   });
+
+  React.useEffect(() => {
+    if (pageResetKey && table.getState().pagination.pageIndex === 0) {
+      return;
+    }
+
+    table.setPageIndex(0);
+  }, [pageResetKey, table]);
 
   const statusOptions = React.useMemo(
     () =>
