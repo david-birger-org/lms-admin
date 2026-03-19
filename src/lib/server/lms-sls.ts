@@ -1,7 +1,6 @@
-import { auth, currentUser } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 
-import { isAdminUser } from "@/lib/auth/admin";
+import { requireAdminApiAccess } from "@/lib/auth/admin-server";
 
 export function getLmsSlsConfig() {
   const rawBaseUrl = process.env.LMS_SLS_BASE_URL?.trim();
@@ -76,16 +75,10 @@ export async function forwardLmsSlsRequest({
 }
 
 export async function proxyLmsSlsRequest(request: Request, path: string) {
-  const { userId } = await auth();
+  const access = await requireAdminApiAccess();
 
-  if (!userId) {
-    return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
-  }
-
-  const user = await currentUser();
-
-  if (!isAdminUser(user)) {
-    return NextResponse.json({ error: "Forbidden." }, { status: 403 });
+  if (!access.ok) {
+    return access.response;
   }
 
   try {
