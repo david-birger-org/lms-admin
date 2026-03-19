@@ -12,6 +12,7 @@ export async function POST(request: Request) {
 
   try {
     const body = (await request.json()) as unknown;
+    const idempotencyKey = request.headers.get("idempotency-key")?.trim();
 
     if (!body || typeof body !== "object" || Array.isArray(body)) {
       return NextResponse.json(
@@ -29,6 +30,11 @@ export async function POST(request: Request) {
         customerEmail: access.user?.primaryEmailAddress?.emailAddress ?? null,
       }),
       contentType: "application/json",
+      headers: idempotencyKey
+        ? {
+            "idempotency-key": idempotencyKey,
+          }
+        : undefined,
       method: "POST",
       path: "/api/monobank/invoice",
       search: incomingUrl.search,

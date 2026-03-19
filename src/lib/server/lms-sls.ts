@@ -29,6 +29,7 @@ export function getLmsSlsConfig() {
 interface ForwardLmsSlsRequestOptions {
   body?: string;
   contentType?: string | null;
+  headers?: HeadersInit;
   method: string;
   path: string;
   search?: string;
@@ -37,6 +38,7 @@ interface ForwardLmsSlsRequestOptions {
 export async function forwardLmsSlsRequest({
   body,
   contentType,
+  headers: additionalHeaders,
   method,
   path,
   search = "",
@@ -51,6 +53,12 @@ export async function forwardLmsSlsRequest({
 
   if (contentType) {
     headers.set("content-type", contentType);
+  }
+
+  if (additionalHeaders) {
+    for (const [key, value] of new Headers(additionalHeaders).entries()) {
+      headers.set(key, value);
+    }
   }
 
   const response = await fetch(targetUrl, {

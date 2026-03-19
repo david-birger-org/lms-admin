@@ -21,6 +21,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { useIdempotencyKey } from "@/hooks/use-idempotency-key";
 import { copyToClipboard } from "@/lib/clipboard";
 
 type SupportedCurrency = "UAH" | "USD";
@@ -44,6 +45,13 @@ export function MonobankInvoiceForm() {
   const [isCopied, setIsCopied] = useState(false);
 
   const parsedAmount = useMemo(() => Number(amount), [amount]);
+  const paymentIntentScope = useMemo(
+    () =>
+      JSON.stringify({ amount, currency, customerName, description, output }),
+    [amount, currency, customerName, description, output],
+  );
+  const { idempotencyKey, renewIdempotencyKey } =
+    useIdempotencyKey(paymentIntentScope);
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -56,6 +64,7 @@ export function MonobankInvoiceForm() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          "idempotency-key": idempotencyKey,
         },
         body: JSON.stringify({
           customerName,
@@ -78,6 +87,7 @@ export function MonobankInvoiceForm() {
 
       const invoice = data as InvoiceResult;
       setResult(invoice);
+      renewIdempotencyKey();
 
       const copied = await copyToClipboard(invoice.pageUrl);
       setIsCopied(copied);
