@@ -1,4 +1,5 @@
 import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
+import { NextResponse } from "next/server";
 
 const CLERK_ACCOUNTS_HOST = "accounts.admin.davidbirger.com";
 
@@ -14,10 +15,15 @@ export default clerkMiddleware(async (auth, request) => {
   }
 
   if (!isPublicRoute(request)) {
-    const { redirectToSignIn, userId } = await auth();
+    const { userId } = await auth();
 
     if (!userId) {
-      return redirectToSignIn();
+      const signInUrl = new URL("/sign-in", request.url);
+      const redirectPath =
+        request.nextUrl.pathname + (request.nextUrl.search || "");
+      signInUrl.searchParams.set("redirect_url", redirectPath);
+
+      return NextResponse.redirect(signInUrl);
     }
   }
 });
