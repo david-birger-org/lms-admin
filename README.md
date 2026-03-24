@@ -29,6 +29,7 @@ The app runs on `http://localhost:3000` by default.
 - `BETTER_AUTH_URL`
 - `NEXT_PUBLIC_AUTH_BASE_URL` (browser Better Auth base URL)
 - `BETTER_AUTH_SECRET`
+- `BETTER_AUTH_API_KEY` (required for Better Auth Dash connectivity)
 - `DATABASE_URL`
 - `ADMIN_EMAILS` (optional comma-separated allowlist for auto-admin role assignment)
 - `LMS_SLS_BASE_URL`

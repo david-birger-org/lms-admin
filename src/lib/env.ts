@@ -16,6 +16,9 @@ function getRequiredEnv(name: string) {
 }
 
 export const env = {
+  get betterAuthApiKey() {
+    return getRequiredEnv("BETTER_AUTH_API_KEY");
+  },
   get betterAuthSecret() {
     return getRequiredEnv("BETTER_AUTH_SECRET");
   },

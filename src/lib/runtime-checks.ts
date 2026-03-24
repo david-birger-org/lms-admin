@@ -18,6 +18,10 @@ export function getRuntimeChecks(): RuntimeCheck[] {
       ready: Boolean(process.env.BETTER_AUTH_SECRET),
     },
     {
+      label: "Better Auth Dash key",
+      ready: Boolean(process.env.BETTER_AUTH_API_KEY),
+    },
+    {
       label: "Auth database URL",
       ready: Boolean(process.env.DATABASE_URL),
     },

@@ -1,5 +1,6 @@
 import "server-only";
 
+import { dash } from "@better-auth/infra";
 import { betterAuth } from "better-auth";
 import { Pool } from "pg";
 
@@ -51,6 +52,11 @@ function createAuth() {
     emailAndPassword: {
       enabled: true,
     },
+    plugins: [
+      dash({
+        apiKey: env.betterAuthApiKey,
+      }),
+    ],
     secret: env.betterAuthSecret,
     trustedOrigins: getTrustedOrigins(),
     account: {
