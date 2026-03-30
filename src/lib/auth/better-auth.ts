@@ -12,6 +12,13 @@ declare global {
   var __lmsAdminAuthPool: Pool | undefined;
 }
 
+const RECOVERABLE_POSTGRES_ERROR_MESSAGES = [
+  "connection terminated unexpectedly",
+  "terminating connection due to administrator command",
+  "client has encountered a connection error and is not queryable",
+  "connection ended unexpectedly",
+];
+
 function createAuth() {
   return betterAuth({
     advanced: {
@@ -160,8 +167,12 @@ function getPool() {
     const connectionString = env.databaseUrl;
 
     globalThis.__lmsAdminAuthPool = new Pool({
+      allowExitOnIdle: true,
+      connectionTimeoutMillis: 10_000,
       connectionString,
+      idleTimeoutMillis: 30_000,
       max: 10,
+      maxUses: 1_000,
       ssl: shouldUseSsl(connectionString)
         ? { rejectUnauthorized: false }
         : undefined,
@@ -177,4 +188,39 @@ export function getAuth() {
   }
 
   return globalThis.__lmsAdminAuth;
+}
+
+export async function resetAuth() {
+  const pool = globalThis.__lmsAdminAuthPool;
+
+  globalThis.__lmsAdminAuth = undefined;
+  globalThis.__lmsAdminAuthPool = undefined;
+
+  await pool?.end().catch(() => undefined);
+}
+
+function isRecoverablePostgresError(error: unknown) {
+  const message = error instanceof Error ? error.message.toLowerCase() : "";
+
+  return RECOVERABLE_POSTGRES_ERROR_MESSAGES.some((candidate) =>
+    message.includes(candidate),
+  );
+}
+
+export async function withAuthRetry<T>(
+  operation: (auth: AuthInstance) => Promise<T>,
+) {
+  try {
+    return await operation(getAuth());
+  } catch (error) {
+    if (!isRecoverablePostgresError(error)) {
+      throw error;
+    }
+
+    // TODO: Replace this retry/reset workaround after moving off the current
+    // Supabase pooler setup, e.g. paid Supabase with a more stable connection path.
+    await resetAuth();
+
+    return operation(getAuth());
+  }
 }

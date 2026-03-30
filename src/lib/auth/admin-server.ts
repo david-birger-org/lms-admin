@@ -8,7 +8,7 @@ import { isAdminUser } from "@/lib/auth/admin";
 import {
   type AuthSessionRecord,
   type AuthUser,
-  getAuth,
+  withAuthRetry,
 } from "@/lib/auth/better-auth";
 
 export interface AuthenticatedAdmin {
@@ -43,9 +43,11 @@ function getErrorMessage(error: unknown) {
 async function resolveAdminAccess(
   requestHeaders: Headers,
 ): Promise<ResolvedAdminAccess> {
-  const session = await getAuth().api.getSession({
-    headers: requestHeaders,
-  });
+  const session = await withAuthRetry((auth) =>
+    auth.api.getSession({
+      headers: requestHeaders,
+    }),
+  );
 
   if (!session) {
     return { status: "unauthorized" };
