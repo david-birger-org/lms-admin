@@ -13,11 +13,14 @@ declare global {
 }
 
 const RECOVERABLE_POSTGRES_ERROR_MESSAGES = [
+  "connection terminated due to connection timeout",
   "connection terminated unexpectedly",
   "terminating connection due to administrator command",
   "client has encountered a connection error and is not queryable",
   "connection ended unexpectedly",
 ];
+
+const RECOVERABLE_BETTER_AUTH_ERROR_CODES = ["FAILED_TO_GET_SESSION"];
 
 function createAuth() {
   return betterAuth({
@@ -201,9 +204,26 @@ export async function resetAuth() {
 
 function isRecoverablePostgresError(error: unknown) {
   const message = error instanceof Error ? error.message.toLowerCase() : "";
+  const causeMessage =
+    error instanceof Error && error.cause instanceof Error
+      ? error.cause.message.toLowerCase()
+      : "";
+  const body =
+    typeof error === "object" && error !== null && "body" in error
+      ? error.body
+      : undefined;
+  const code =
+    typeof body === "object" && body !== null && "code" in body
+      ? body.code
+      : undefined;
 
-  return RECOVERABLE_POSTGRES_ERROR_MESSAGES.some((candidate) =>
-    message.includes(candidate),
+  return (
+    RECOVERABLE_POSTGRES_ERROR_MESSAGES.some(
+      (candidate) =>
+        message.includes(candidate) || causeMessage.includes(candidate),
+    ) ||
+    (typeof code === "string" &&
+      RECOVERABLE_BETTER_AUTH_ERROR_CODES.includes(code))
   );
 }
 
