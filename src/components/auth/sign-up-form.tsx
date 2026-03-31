@@ -44,22 +44,28 @@ export function SignUpForm() {
 
     setIsSubmitting(true);
 
-    const { error: signUpError } = await authClient.signUp.email({
-      callbackURL: redirectTo,
-      email,
-      name,
-      password,
-    });
+    try {
+      const { error: signUpError } = await authClient.signUp.email({
+        callbackURL: redirectTo,
+        email,
+        name,
+        password,
+      });
 
-    setIsSubmitting(false);
+      if (signUpError) {
+        setError(signUpError.message || "Failed to create account.");
+        return;
+      }
 
-    if (signUpError) {
-      setError(signUpError.message || "Failed to create account.");
-      return;
+      router.replace(redirectTo);
+      router.refresh();
+    } catch (error) {
+      setError(
+        error instanceof Error ? error.message : "Failed to create account.",
+      );
+    } finally {
+      setIsSubmitting(false);
     }
-
-    router.replace(redirectTo);
-    router.refresh();
   }
 
   return (

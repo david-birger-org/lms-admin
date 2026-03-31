@@ -36,22 +36,26 @@ export function SignInForm() {
     setError(null);
     setIsSubmitting(true);
 
-    const { error: signInError } = await authClient.signIn.email({
-      callbackURL: redirectTo,
-      email,
-      password,
-      rememberMe: true,
-    });
+    try {
+      const { error: signInError } = await authClient.signIn.email({
+        callbackURL: redirectTo,
+        email,
+        password,
+        rememberMe: true,
+      });
 
-    setIsSubmitting(false);
+      if (signInError) {
+        setError(signInError.message || "Failed to sign in.");
+        return;
+      }
 
-    if (signInError) {
-      setError(signInError.message || "Failed to sign in.");
-      return;
+      router.replace(redirectTo);
+      router.refresh();
+    } catch (error) {
+      setError(error instanceof Error ? error.message : "Failed to sign in.");
+    } finally {
+      setIsSubmitting(false);
     }
-
-    router.replace(redirectTo);
-    router.refresh();
   }
 
   return (
