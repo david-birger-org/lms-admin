@@ -2,6 +2,7 @@
 
 import { flexRender, type Table } from "@tanstack/react-table";
 
+import { Button } from "@/components/ui/button";
 import {
   Table as DataTable,
   TableBody,
@@ -13,9 +14,15 @@ import {
 import type { StatementItem } from "@/lib/monobank";
 
 export function MonobankPaymentsTableContent({
+  emptyActionLabel,
+  emptyMessage = "No results.",
+  onEmptyAction,
   table,
   onRowOpen,
 }: {
+  emptyActionLabel?: string;
+  emptyMessage?: string;
+  onEmptyAction?: () => void;
   table: Table<StatementItem>;
   onRowOpen: (payment: StatementItem) => void;
 }) {
@@ -67,7 +74,16 @@ export function MonobankPaymentsTableContent({
                 colSpan={table.getVisibleLeafColumns().length}
                 className="h-24 text-center"
               >
-                No results.
+                <div className="flex flex-col items-center gap-3 py-4">
+                  <p className="text-sm text-muted-foreground">
+                    {emptyMessage}
+                  </p>
+                  {emptyActionLabel && onEmptyAction ? (
+                    <Button variant="outline" size="sm" onClick={onEmptyAction}>
+                      {emptyActionLabel}
+                    </Button>
+                  ) : null}
+                </div>
               </TableCell>
             </TableRow>
           )}

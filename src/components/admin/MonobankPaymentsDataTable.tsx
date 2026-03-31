@@ -36,6 +36,7 @@ const defaultColumnVisibility: VisibilityState = {
 
 export function MonobankPaymentsDataTable({
   data,
+  emptyMessage,
   isLoading,
   onRefresh,
   onInvoiceChanged,
@@ -44,6 +45,7 @@ export function MonobankPaymentsDataTable({
   description = "Search the statement feed, filter rows, and inspect invoice-level payment details.",
 }: {
   data: StatementItem[];
+  emptyMessage?: string;
   isLoading: boolean;
   onRefresh: () => void;
   onInvoiceChanged?: () => void;
@@ -173,6 +175,27 @@ export function MonobankPaymentsDataTable({
     table.getColumn("search")?.setFilterValue("");
   }, [table]);
 
+  const resolvedEmptyMessage = React.useMemo(() => {
+    if (isLoading && data.length === 0) {
+      return "Loading results...";
+    }
+
+    if (hasActiveState && filteredData.length === 0) {
+      return "No visible results. Reset filters or clear the search to see every row.";
+    }
+
+    return emptyMessage ?? "No results.";
+  }, [
+    data.length,
+    emptyMessage,
+    filteredData.length,
+    hasActiveState,
+    isLoading,
+  ]);
+
+  const emptyActionLabel =
+    hasActiveState && filteredData.length === 0 ? "Reset table" : undefined;
+
   return (
     <Card className="shadow-xs">
       <CardHeader className="border-b px-3 sm:px-6">
@@ -204,6 +227,9 @@ export function MonobankPaymentsDataTable({
           <MonobankPaymentsTableContent
             table={table}
             onRowOpen={handleOpenPaymentDetails}
+            emptyActionLabel={emptyActionLabel}
+            emptyMessage={resolvedEmptyMessage}
+            onEmptyAction={emptyActionLabel ? resetTable : undefined}
           />
 
           <MonobankPaymentDetailsPopover
