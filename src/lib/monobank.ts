@@ -19,7 +19,7 @@ export interface StatementItem {
 }
 
 export interface PendingInvoiceItem {
-  amount: number;
+  amount: number | string;
   createdDate: string;
   currency: MonobankCurrency;
   customerName: string;
@@ -32,11 +32,20 @@ export interface PendingInvoiceItem {
   status: string;
 }
 
+function parseMinorUnits(value: number | string) {
+  if (typeof value === "number") {
+    return value;
+  }
+
+  const parsedValue = Number(value);
+  return Number.isFinite(parsedValue) ? parsedValue : undefined;
+}
+
 export function mapPendingInvoiceToStatementItem(
   invoice: PendingInvoiceItem,
 ): StatementItem {
   return {
-    amount: invoice.amount,
+    amount: parseMinorUnits(invoice.amount),
     ccy: invoice.currency,
     customerName: invoice.customerName,
     date: invoice.createdDate,

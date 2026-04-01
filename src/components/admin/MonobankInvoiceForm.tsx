@@ -20,13 +20,28 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { useIdempotencyKey } from "@/hooks/use-idempotency-key";
 import { copyToClipboard } from "@/lib/clipboard";
 
 type SupportedCurrency = "UAH" | "USD";
 type OutputMode = "link" | "qr";
 const DEFAULT_EXPIRATION_MINUTES = 24 * 60;
+const EXPIRATION_PRESETS = [
+  { label: "15 min", minutes: 15 },
+  { label: "1 hour", minutes: 60 },
+  { label: "24 hours", minutes: DEFAULT_EXPIRATION_MINUTES },
+] as const;
+
+function formatExpirationPreview(validitySeconds: number) {
+  if (!Number.isInteger(validitySeconds) || validitySeconds < 60) {
+    return null;
+  }
+
+  return new Date(Date.now() + validitySeconds * 1000).toLocaleString();
+}
 
 interface InvoiceResult {
   expiresAt?: string;
@@ -44,9 +59,13 @@ export function MonobankInvoiceForm({
   const [description, setDescription] = useState("");
   const [amount, setAmount] = useState("100");
   const [currency, setCurrency] = useState<SupportedCurrency>("UAH");
-  const [expirationMinutes, setExpirationMinutes] = useState(
+  const [selectedExpirationPreset, setSelectedExpirationPreset] = useState(
     String(DEFAULT_EXPIRATION_MINUTES),
   );
+  const [customExpirationMinutes, setCustomExpirationMinutes] = useState(
+    String(DEFAULT_EXPIRATION_MINUTES),
+  );
+  const [useCustomExpiration, setUseCustomExpiration] = useState(false);
   const [output, setOutput] = useState<OutputMode>("link");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -54,6 +73,11 @@ export function MonobankInvoiceForm({
   const [isCopied, setIsCopied] = useState(false);
 
   const parsedAmount = useMemo(() => Number(amount), [amount]);
+  const expirationMinutes = useMemo(
+    () =>
+      useCustomExpiration ? customExpirationMinutes : selectedExpirationPreset,
+    [customExpirationMinutes, selectedExpirationPreset, useCustomExpiration],
+  );
   const parsedExpirationMinutes = useMemo(
     () => Number(expirationMinutes),
     [expirationMinutes],
@@ -62,17 +86,32 @@ export function MonobankInvoiceForm({
     () => Math.round(parsedExpirationMinutes * 60),
     [parsedExpirationMinutes],
   );
+  const expiresAtPreview = useMemo(
+    () => formatExpirationPreview(validitySeconds),
+    [validitySeconds],
+  );
   const paymentIntentScope = useMemo(
     () =>
       JSON.stringify({
         amount,
+        customExpirationMinutes,
         currency,
         customerName,
         description,
         expirationMinutes,
         output,
+        useCustomExpiration,
       }),
-    [amount, currency, customerName, description, expirationMinutes, output],
+    [
+      amount,
+      currency,
+      customExpirationMinutes,
+      customerName,
+      description,
+      expirationMinutes,
+      output,
+      useCustomExpiration,
+    ],
   );
   const { idempotencyKey, renewIdempotencyKey } =
     useIdempotencyKey(paymentIntentScope);
@@ -229,27 +268,81 @@ export function MonobankInvoiceForm({
                   </Select>
                 </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="expirationMinutes">
-                    Expires in (minutes)
-                  </Label>
-                  <Input
-                    className="h-9"
-                    id="expirationMinutes"
-                    type="number"
-                    inputMode="numeric"
-                    min="1"
-                    step="1"
-                    value={expirationMinutes}
-                    onChange={(event) =>
-                      setExpirationMinutes(event.target.value)
-                    }
-                    required
-                  />
-                  <p className="text-muted-foreground text-xs">
-                    Default Monobank lifetime is 24 hours (
-                    {DEFAULT_EXPIRATION_MINUTES} minutes).
-                  </p>
+                <div className="space-y-3">
+                  <div className="space-y-2">
+                    <Label>Expires in</Label>
+                    <ToggleGroup
+                      type="single"
+                      value={selectedExpirationPreset}
+                      onValueChange={(value) => {
+                        if (value) {
+                          setSelectedExpirationPreset(value);
+                        }
+                      }}
+                      variant="outline"
+                      className="grid w-full grid-cols-3 gap-2"
+                    >
+                      {EXPIRATION_PRESETS.map((preset) => (
+                        <ToggleGroupItem
+                          key={preset.minutes}
+                          value={String(preset.minutes)}
+                          className="h-9 px-2 text-xs sm:text-sm"
+                        >
+                          {preset.label}
+                        </ToggleGroupItem>
+                      ))}
+                    </ToggleGroup>
+                  </div>
+
+                  <div className="flex items-center justify-between gap-3 rounded-lg border bg-background/70 px-3 py-2">
+                    <div className="space-y-0.5">
+                      <Label htmlFor="customExpirationToggle">
+                        Use custom duration
+                      </Label>
+                      <p className="text-muted-foreground text-xs">
+                        Override the presets with a custom minute value.
+                      </p>
+                    </div>
+                    <Switch
+                      id="customExpirationToggle"
+                      checked={useCustomExpiration}
+                      onCheckedChange={setUseCustomExpiration}
+                    />
+                  </div>
+
+                  {useCustomExpiration ? (
+                    <div className="space-y-2">
+                      <Label htmlFor="customExpirationMinutes">
+                        Custom duration (minutes)
+                      </Label>
+                      <Input
+                        className="h-9"
+                        id="customExpirationMinutes"
+                        type="number"
+                        inputMode="numeric"
+                        min="1"
+                        step="1"
+                        value={customExpirationMinutes}
+                        onChange={(event) =>
+                          setCustomExpirationMinutes(event.target.value)
+                        }
+                        required
+                      />
+                    </div>
+                  ) : null}
+
+                  <div className="rounded-lg border bg-background/70 px-3 py-2">
+                    <p className="text-muted-foreground text-[11px] font-medium uppercase tracking-[0.18em]">
+                      Expires at
+                    </p>
+                    <p className="mt-1 text-sm">
+                      {expiresAtPreview ?? "Enter at least 1 minute."}
+                    </p>
+                    <p className="text-muted-foreground mt-1 text-xs">
+                      Default Monobank lifetime is 24 hours (
+                      {DEFAULT_EXPIRATION_MINUTES} minutes).
+                    </p>
+                  </div>
                 </div>
               </div>
             </div>
