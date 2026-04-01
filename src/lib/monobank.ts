@@ -18,47 +18,6 @@ export interface StatementItem {
   pageUrl?: string;
 }
 
-export interface PendingInvoiceItem {
-  amount: number | string;
-  createdDate: string;
-  currency: MonobankCurrency;
-  customerName: string;
-  description: string;
-  error?: string;
-  expiresAt?: string;
-  invoiceId: string;
-  pageUrl?: string;
-  reference: string;
-  status: string;
-}
-
-function parseMinorUnits(value: number | string) {
-  if (typeof value === "number") {
-    return value;
-  }
-
-  const parsedValue = Number(value);
-  return Number.isFinite(parsedValue) ? parsedValue : undefined;
-}
-
-export function mapPendingInvoiceToStatementItem(
-  invoice: PendingInvoiceItem,
-): StatementItem {
-  return {
-    amount: parseMinorUnits(invoice.amount),
-    ccy: invoice.currency,
-    customerName: invoice.customerName,
-    date: invoice.createdDate,
-    destination: invoice.description,
-    error: invoice.error,
-    expiresAt: invoice.expiresAt,
-    invoiceId: invoice.invoiceId,
-    pageUrl: invoice.pageUrl,
-    reference: invoice.reference,
-    status: invoice.status,
-  };
-}
-
 export interface MonobankStatementSnapshot {
   rows: StatementItem[];
   fetchedAt: number;
