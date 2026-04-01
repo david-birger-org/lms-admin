@@ -2,8 +2,17 @@
 
 import { MonobankPaymentsDataTable } from "@/components/admin/MonobankPaymentsDataTable";
 import { useMonobankStatement } from "@/components/admin/MonobankStatementProvider";
+import type { PaymentDetailsSource } from "@/lib/payments";
 
-export function MonobankPaymentsHistory() {
+export function MonobankPaymentsHistory({
+  title = "Provider statement",
+  description = "Inspect the live Monobank statement feed for provider-side reconciliation.",
+  detailsSource = "provider",
+}: {
+  title?: string;
+  description?: string;
+  detailsSource?: PaymentDetailsSource;
+}) {
   const { state, actions } = useMonobankStatement();
 
   return (
@@ -17,6 +26,9 @@ export function MonobankPaymentsHistory() {
         data={state.rows}
         isLoading={state.isLoading}
         onRefresh={() => void actions.refresh()}
+        detailsSource={detailsSource}
+        title={title}
+        description={description}
       />
     </div>
   );

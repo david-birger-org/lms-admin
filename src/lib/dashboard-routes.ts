@@ -3,6 +3,7 @@ import {
   CreditCard,
   History,
   LayoutDashboard,
+  ScrollText,
   Settings,
   ShieldCheck,
 } from "lucide-react";
@@ -32,8 +33,15 @@ export const dashboardRoutes = [
     href: "/payment-history",
     title: "Payment History",
     description:
-      "Search the statement feed and inspect invoice-level payment activity.",
+      "Review canonical app payment history from the payments table.",
     icon: History,
+  },
+  {
+    href: "/statement-audit",
+    title: "Statement Audit",
+    description:
+      "Inspect the live Monobank statement feed for provider reconciliation.",
+    icon: ScrollText,
   },
   {
     href: "/runtime",

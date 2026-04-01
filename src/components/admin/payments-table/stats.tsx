@@ -11,7 +11,7 @@ export function MonobankPaymentsTableStats({
         Total: {totalCount}
       </div>
       <div className="rounded-full border bg-muted/30 px-2.5 py-1">
-        Successful: {successfulCount}
+        Settled: {successfulCount}
       </div>
     </div>
   );

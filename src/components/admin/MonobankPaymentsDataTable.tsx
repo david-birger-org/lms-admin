@@ -27,6 +27,10 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import type { StatementItem } from "@/lib/monobank";
+import {
+  isSuccessfulPaymentStatus,
+  type PaymentDetailsSource,
+} from "@/lib/payments";
 
 const defaultColumnVisibility: VisibilityState = {
   search: false,
@@ -43,6 +47,7 @@ export function MonobankPaymentsDataTable({
   showStats = true,
   title = "Payments history",
   description = "Search the statement feed, filter rows, and inspect invoice-level payment details.",
+  detailsSource = "database",
 }: {
   data: StatementItem[];
   emptyMessage?: string;
@@ -52,6 +57,7 @@ export function MonobankPaymentsDataTable({
   showStats?: boolean;
   title?: string;
   description?: string;
+  detailsSource?: PaymentDetailsSource;
 }) {
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
@@ -149,7 +155,7 @@ export function MonobankPaymentsDataTable({
     .filter((value): value is string => Boolean(value));
 
   const successfulCount = React.useMemo(
-    () => data.filter((item) => item.status === "success").length,
+    () => data.filter((item) => isSuccessfulPaymentStatus(item.status)).length,
     [data],
   );
 
@@ -235,6 +241,7 @@ export function MonobankPaymentsDataTable({
           <MonobankPaymentDetailsPopover
             invoiceId={activePayment?.invoiceId}
             payment={activePayment ?? undefined}
+            detailsSource={detailsSource}
             open={detailsOpen}
             onOpenChange={setDetailsOpen}
             onInvoiceChanged={onInvoiceChanged}

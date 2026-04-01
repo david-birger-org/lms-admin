@@ -15,15 +15,20 @@ import {
   formatMonobankShortDate,
   type StatementItem,
 } from "@/lib/monobank";
+import {
+  isFailedPaymentStatus,
+  isSuccessfulPaymentStatus,
+  normalizePaymentStatus,
+} from "@/lib/payments";
 
 function StatusIcon({ status }: { status?: string | null }) {
-  const normalizedStatus = status?.toLowerCase();
+  const normalizedStatus = normalizePaymentStatus(status);
 
-  if (normalizedStatus === "success") {
+  if (isSuccessfulPaymentStatus(status)) {
     return (
       <CircleCheckBig
         className="size-4 text-emerald-600"
-        aria-label="Success"
+        aria-label={status ?? "Paid"}
       />
     );
   }
@@ -37,8 +42,13 @@ function StatusIcon({ status }: { status?: string | null }) {
     );
   }
 
-  if (normalizedStatus === "failure") {
-    return <CircleX className="size-4 text-rose-600" aria-label="Failure" />;
+  if (isFailedPaymentStatus(status)) {
+    return (
+      <CircleX
+        className="size-4 text-rose-600"
+        aria-label={status ?? "Failed"}
+      />
+    );
   }
 
   if (

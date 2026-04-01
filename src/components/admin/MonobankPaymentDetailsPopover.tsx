@@ -27,13 +27,14 @@ import {
   type MonobankCurrency,
   type StatementItem,
 } from "@/lib/monobank";
+import type { PaymentDetailsSource } from "@/lib/payments";
 import { cn } from "@/lib/utils";
 
 export interface PaymentDetails {
   invoiceId?: string;
   status?: string;
-  failureReason?: string;
-  errCode?: string;
+  failureReason?: number | string;
+  errCode?: number | string;
   amount?: number;
   ccy?: MonobankCurrency;
   currency?: MonobankCurrency;
@@ -60,6 +61,53 @@ export interface PaymentDetails {
 const EXTENDED_DETAILS_FALLBACK_MESSAGE =
   "Extended payment details are temporarily unavailable. Showing statement data instead.";
 
+const pendingStatusAppearance = {
+  className:
+    "border-sky-200 bg-sky-50 text-sky-700 dark:border-sky-900/60 dark:bg-sky-500/10 dark:text-sky-300",
+  icon: AlertTriangle,
+  label: "Pending",
+} as const;
+
+const paymentStatusAppearances = {
+  cancelled: {
+    className:
+      "border-border bg-muted/40 text-muted-foreground dark:bg-muted/20",
+    icon: XCircle,
+    label: "Cancelled",
+  },
+  expired: {
+    className:
+      "border-amber-200 bg-amber-50 text-amber-700 dark:border-amber-900/60 dark:bg-amber-500/10 dark:text-amber-300",
+    icon: XCircle,
+    label: "Expired",
+  },
+  failed: {
+    className:
+      "border-rose-200 bg-rose-50 text-rose-700 dark:border-rose-900/60 dark:bg-rose-500/10 dark:text-rose-300",
+    icon: XCircle,
+    label: "Failed",
+  },
+  failure: {
+    className:
+      "border-rose-200 bg-rose-50 text-rose-700 dark:border-rose-900/60 dark:bg-rose-500/10 dark:text-rose-300",
+    icon: XCircle,
+    label: "Failure",
+  },
+  invoice_created: pendingStatusAppearance,
+  paid: {
+    className:
+      "border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-900/60 dark:bg-emerald-500/10 dark:text-emerald-300",
+    icon: CheckCircle2,
+    label: "Paid",
+  },
+  success: {
+    className:
+      "border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-900/60 dark:bg-emerald-500/10 dark:text-emerald-300",
+    icon: CheckCircle2,
+    label: "Success",
+  },
+} as const;
+
 function getPaymentDetailsErrorMessage(error: unknown) {
   const rawMessage = error instanceof Error ? error.message : "";
 
@@ -68,6 +116,75 @@ function getPaymentDetailsErrorMessage(error: unknown) {
   }
 
   return rawMessage || EXTENDED_DETAILS_FALLBACK_MESSAGE;
+}
+
+function normalizePaymentStatus(status?: string) {
+  const normalizedStatus = status?.trim().toLowerCase();
+  return normalizedStatus ? normalizedStatus : null;
+}
+
+function isCancelableInvoiceStatus(status?: string) {
+  const normalizedStatus = normalizePaymentStatus(status);
+  return (
+    normalizedStatus === "created" || normalizedStatus === "invoice_created"
+  );
+}
+
+function stringifyDetailValue(value?: number | string) {
+  return value === undefined || value === null ? "-" : String(value);
+}
+
+function mergeUpdatedDetails({
+  current,
+  payload,
+  payment,
+  invoiceId,
+}: {
+  current: PaymentDetails | null;
+  payload: PaymentDetails;
+  payment?: StatementItem;
+  invoiceId: string;
+}) {
+  return {
+    ...(current ?? {}),
+    ...payload,
+    expiresAt: payload.expiresAt ?? current?.expiresAt ?? payment?.expiresAt,
+    invoiceId: payload.invoiceId ?? invoiceId,
+    pageUrl: payload.pageUrl ?? current?.pageUrl ?? payment?.pageUrl,
+    status: payload.status ?? current?.status ?? "cancelled",
+  } satisfies PaymentDetails;
+}
+
+function getCancelErrorMessage(error: unknown) {
+  return error instanceof Error ? error.message : "Failed to cancel invoice";
+}
+
+function shouldLoadDetails({
+  details,
+  effectiveInvoiceId,
+  error,
+  hideTrigger,
+  isLoading,
+  open,
+  warning,
+}: {
+  details: PaymentDetails | null;
+  effectiveInvoiceId?: string;
+  error: string | null;
+  hideTrigger: boolean;
+  isLoading: boolean;
+  open: boolean;
+  warning: string | null;
+}) {
+  return (
+    hideTrigger &&
+    open &&
+    !details &&
+    !error &&
+    !warning &&
+    !isLoading &&
+    Boolean(effectiveInvoiceId)
+  );
 }
 
 function mergePaymentDetails(
@@ -128,16 +245,7 @@ function DetailCard({
 }
 
 function getStatusAppearance(status?: string) {
-  const normalizedStatus = status?.toLowerCase();
-
-  if (normalizedStatus === "success") {
-    return {
-      label: "Success",
-      icon: CheckCircle2,
-      className:
-        "border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-900/60 dark:bg-emerald-500/10 dark:text-emerald-300",
-    };
-  }
+  const normalizedStatus = normalizePaymentStatus(status);
 
   if (normalizedStatus === "processing" || normalizedStatus === "hold") {
     return {
@@ -148,52 +256,14 @@ function getStatusAppearance(status?: string) {
     };
   }
 
-  if (normalizedStatus === "failure") {
-    return {
-      label: "Failure",
-      icon: XCircle,
-      className:
-        "border-rose-200 bg-rose-50 text-rose-700 dark:border-rose-900/60 dark:bg-rose-500/10 dark:text-rose-300",
-    };
+  if (normalizedStatus === "created") {
+    return pendingStatusAppearance;
   }
 
-  if (
-    normalizedStatus === "invoice_created" ||
-    normalizedStatus === "created"
-  ) {
-    return {
-      label: "Pending",
-      icon: AlertTriangle,
-      className:
-        "border-sky-200 bg-sky-50 text-sky-700 dark:border-sky-900/60 dark:bg-sky-500/10 dark:text-sky-300",
-    };
-  }
-
-  if (normalizedStatus === "paid") {
-    return {
-      label: "Paid",
-      icon: CheckCircle2,
-      className:
-        "border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-900/60 dark:bg-emerald-500/10 dark:text-emerald-300",
-    };
-  }
-
-  if (normalizedStatus === "failed") {
-    return {
-      label: "Failed",
-      icon: XCircle,
-      className:
-        "border-rose-200 bg-rose-50 text-rose-700 dark:border-rose-900/60 dark:bg-rose-500/10 dark:text-rose-300",
-    };
-  }
-
-  if (normalizedStatus === "cancelled") {
-    return {
-      label: "Cancelled",
-      icon: XCircle,
-      className:
-        "border-border bg-muted/40 text-muted-foreground dark:bg-muted/20",
-    };
+  if (normalizedStatus && normalizedStatus in paymentStatusAppearances) {
+    return paymentStatusAppearances[
+      normalizedStatus as keyof typeof paymentStatusAppearances
+    ];
   }
 
   return {
@@ -427,11 +497,11 @@ function PaymentDetailsBody({
         <div className="grid gap-3 sm:grid-cols-2">
           <DetailCard
             label="Failure reason"
-            value={displayDetails.failureReason ?? "-"}
+            value={stringifyDetailValue(displayDetails.failureReason)}
           />
           <DetailCard
             label="Error code"
-            value={displayDetails.errCode ?? "-"}
+            value={stringifyDetailValue(displayDetails.errCode)}
           />
         </div>
       )}
@@ -442,6 +512,7 @@ function PaymentDetailsBody({
 export function MonobankPaymentDetailsPopover({
   invoiceId,
   payment,
+  detailsSource = "database",
   open: controlledOpen,
   onOpenChange,
   onInvoiceChanged,
@@ -449,6 +520,7 @@ export function MonobankPaymentDetailsPopover({
 }: {
   invoiceId?: string;
   payment?: StatementItem;
+  detailsSource?: PaymentDetailsSource;
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
   onInvoiceChanged?: () => void;
@@ -478,8 +550,12 @@ export function MonobankPaymentDetailsPopover({
     setWarning(null);
 
     try {
+      const detailsEndpoint =
+        detailsSource === "provider"
+          ? "/api/monobank/invoice/status"
+          : "/api/payments/details";
       const response = await fetch(
-        `/api/monobank/invoice/status?invoiceId=${encodeURIComponent(effectiveInvoiceId)}`,
+        `${detailsEndpoint}?invoiceId=${encodeURIComponent(effectiveInvoiceId)}`,
         {
           method: "GET",
           cache: "no-store",
@@ -507,7 +583,7 @@ export function MonobankPaymentDetailsPopover({
     } finally {
       setIsLoading(false);
     }
-  }, [effectiveInvoiceId, payment]);
+  }, [detailsSource, effectiveInvoiceId, payment]);
 
   const handleOpenChange = useCallback(
     (nextOpen: boolean) => {
@@ -542,10 +618,9 @@ export function MonobankPaymentDetailsPopover({
   }, [effectiveInvoiceId]);
 
   const displayDetails = mergePaymentDetails(payment, details);
-  const normalizedStatus = displayDetails?.status?.toLowerCase();
   const canCancelInvoice =
     Boolean(effectiveInvoiceId) &&
-    (normalizedStatus === "created" || normalizedStatus === "invoice_created");
+    isCancelableInvoiceStatus(displayDetails?.status);
 
   const handleCancelInvoice = useCallback(async () => {
     if (!effectiveInvoiceId || !canCancelInvoice || isCancelling) {
@@ -578,20 +653,17 @@ export function MonobankPaymentDetailsPopover({
         throw new Error(payload.error ?? "Failed to cancel invoice");
       }
 
-      setDetails((current) => ({
-        ...(current ?? {}),
-        expiresAt: current?.expiresAt ?? payment?.expiresAt,
-        invoiceId: effectiveInvoiceId,
-        pageUrl: current?.pageUrl ?? payment?.pageUrl,
-        status: "cancelled",
-      }));
+      setDetails((current) =>
+        mergeUpdatedDetails({
+          current,
+          payload,
+          payment,
+          invoiceId: effectiveInvoiceId,
+        }),
+      );
       onInvoiceChanged?.();
     } catch (cancelError) {
-      setCancellationError(
-        cancelError instanceof Error
-          ? cancelError.message
-          : "Failed to cancel invoice",
-      );
+      setCancellationError(getCancelErrorMessage(cancelError));
     } finally {
       setIsCancelling(false);
     }
@@ -600,19 +672,20 @@ export function MonobankPaymentDetailsPopover({
     effectiveInvoiceId,
     isCancelling,
     onInvoiceChanged,
-    payment?.expiresAt,
-    payment?.pageUrl,
+    payment,
   ]);
 
   useEffect(() => {
     if (
-      hideTrigger &&
-      open &&
-      !details &&
-      !error &&
-      !warning &&
-      !isLoading &&
-      effectiveInvoiceId
+      shouldLoadDetails({
+        details,
+        effectiveInvoiceId,
+        error,
+        hideTrigger,
+        isLoading,
+        open,
+        warning,
+      })
     ) {
       void loadDetails();
     }

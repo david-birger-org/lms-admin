@@ -1,6 +1,6 @@
 import { BarChart3, PanelsTopLeft } from "lucide-react";
 
-import { MonobankStatementProvider } from "@/components/admin/MonobankStatementProvider";
+import { PaymentsHistoryProvider } from "@/components/admin/PaymentsHistoryProvider";
 import { OverviewCards } from "@/components/dashboard/overview-cards";
 import {
   DashboardPage,
@@ -15,12 +15,12 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { getRuntimeChecks } from "@/lib/runtime-checks";
-import { getInitialMonobankStatementState } from "@/lib/server/monobank";
+import { getInitialPaymentsHistoryState } from "@/lib/server/payments";
 
 export default async function OverviewPage() {
   const runtimeChecks = getRuntimeChecks();
   const readyCount = runtimeChecks.filter((item) => item.ready).length;
-  const statement = await getInitialMonobankStatementState();
+  const paymentHistory = await getInitialPaymentsHistoryState();
 
   return (
     <DashboardPage route="/">
@@ -29,11 +29,11 @@ export default async function OverviewPage() {
         totalChecks={runtimeChecks.length}
       />
 
-      <MonobankStatementProvider {...statement}>
+      <PaymentsHistoryProvider {...paymentHistory}>
         <DashboardSection>
           <PaymentsChart />
         </DashboardSection>
-      </MonobankStatementProvider>
+      </PaymentsHistoryProvider>
 
       <DashboardSection>
         <Card className="shadow-xs">
