@@ -2,7 +2,12 @@
 
 import type { Table } from "@tanstack/react-table";
 import { CheckCheck, ChevronDown, RefreshCw, X } from "lucide-react";
-
+import { toast } from "sonner";
+import {
+  downloadTextFile,
+  formatStatementItemsAsCsv,
+  formatStatementItemsAsRawData,
+} from "@/components/admin/payments-table/export-utils";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -44,9 +49,13 @@ function getColumnLabel(columnId: string) {
 
 export function MonobankPaymentsTableToolbar({
   table,
+  exportFilePrefix,
   isLoading,
   onRefresh,
+  onSearchChange,
   selectedStatuses,
+  selectedRows,
+  searchValue,
   statusOptions,
   selectedPaymentIdentifiers,
   hasActiveState,
@@ -55,9 +64,13 @@ export function MonobankPaymentsTableToolbar({
   onClearSelection,
 }: {
   table: Table<StatementItem>;
+  exportFilePrefix: string;
   isLoading: boolean;
   onRefresh: () => void;
+  onSearchChange: (value: string) => void;
   selectedStatuses: string[];
+  selectedRows: StatementItem[];
+  searchValue: string;
   statusOptions: string[];
   selectedPaymentIdentifiers: string[];
   hasActiveState: boolean;
@@ -65,18 +78,55 @@ export function MonobankPaymentsTableToolbar({
   onReset: () => void;
   onClearSelection: () => void;
 }) {
-  const searchValue =
-    (table.getColumn("search")?.getFilterValue() as string | undefined) ?? "";
   const selectedRowCount = table.getFilteredSelectedRowModel().rows.length;
+  const normalizedExportFilePrefix =
+    exportFilePrefix
+      .trim()
+      .toLowerCase()
+      .replaceAll(/[^a-z0-9]+/g, "-")
+      .replaceAll(/(^-|-$)/g, "") || "payments";
+
+  async function handleCopySelectedIds() {
+    const copied = await copyToClipboard(selectedPaymentIdentifiers.join("\n"));
+
+    if (!copied) {
+      toast.error("Failed to copy selected IDs.");
+      return;
+    }
+
+    toast.success("Selected IDs copied.");
+  }
+
+  async function handleCopySelectedRawData() {
+    const copied = await copyToClipboard(
+      formatStatementItemsAsRawData(selectedRows),
+    );
+
+    if (!copied) {
+      toast.error("Failed to copy selected raw data.");
+      return;
+    }
+
+    toast.success("Selected raw data copied.");
+  }
+
+  function handleExportSelectedCsv() {
+    const timestamp = new Date().toISOString().replaceAll(/[:.]/g, "-");
+
+    downloadTextFile({
+      content: formatStatementItemsAsCsv(selectedRows),
+      fileName: `${normalizedExportFilePrefix}-selected-${timestamp}.csv`,
+      mimeType: "text/csv;charset=utf-8",
+    });
+    toast.success("Selected rows exported as CSV.");
+  }
 
   return (
     <div className="flex flex-col gap-2 py-3 md:flex-row md:items-center">
       <Input
         placeholder="Search invoice, reference, card, or description..."
         value={searchValue}
-        onChange={(event) =>
-          table.getColumn("search")?.setFilterValue(event.target.value)
-        }
+        onChange={(event) => onSearchChange(event.target.value)}
         className="h-9 md:max-w-sm"
       />
 
@@ -92,11 +142,24 @@ export function MonobankPaymentsTableToolbar({
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-56">
               <DropdownMenuGroup>
-                <DropdownMenuLabel>Bulk actions</DropdownMenuLabel>
+                <DropdownMenuLabel>
+                  {selectedRowCount} selected
+                </DropdownMenuLabel>
                 <DropdownMenuItem
-                  onClick={() =>
-                    void copyToClipboard(selectedPaymentIdentifiers.join("\n"))
-                  }
+                  disabled={selectedRows.length === 0}
+                  onClick={() => handleExportSelectedCsv()}
+                >
+                  Export selected CSV
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  disabled={selectedRows.length === 0}
+                  onClick={() => void handleCopySelectedRawData()}
+                >
+                  Copy selected raw data
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  disabled={selectedPaymentIdentifiers.length === 0}
+                  onClick={() => void handleCopySelectedIds()}
                 >
                   Copy selected IDs
                 </DropdownMenuItem>
@@ -145,9 +208,7 @@ export function MonobankPaymentsTableToolbar({
             <DropdownMenuGroup>
               {table
                 .getAllColumns()
-                .filter(
-                  (column) => column.getCanHide() && column.id !== "search",
-                )
+                .filter((column) => column.getCanHide())
                 .map((column) => (
                   <DropdownMenuCheckboxItem
                     key={column.id}

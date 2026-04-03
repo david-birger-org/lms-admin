@@ -6,6 +6,7 @@ import {
   getFilteredRowModel,
   getPaginationRowModel,
   getSortedRowModel,
+  type RowData,
   type RowSelectionState,
   type SortingState,
   useReactTable,
@@ -26,14 +27,25 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import type { StatementItem } from "@/lib/monobank";
+import {
+  formatMonobankDate,
+  formatMonobankMoney,
+  formatMonobankShortDate,
+  getMonobankCurrencyLabel,
+  type StatementItem,
+} from "@/lib/monobank";
 import {
   isSuccessfulPaymentStatus,
   type PaymentDetailsSource,
 } from "@/lib/payments";
 
+declare module "@tanstack/react-table" {
+  interface TableMeta<TData extends RowData> {
+    onOpenPaymentDetails?: (payment: StatementItem) => void;
+  }
+}
+
 const defaultColumnVisibility: VisibilityState = {
-  search: false,
   profitAmount: false,
   invoiceId: false,
 };
@@ -44,6 +56,42 @@ function getPaymentRowId(payment: StatementItem, index: number) {
     payment.reference ??
     `${payment.date ?? "unknown-date"}-${payment.amount ?? 0}-${index}`
   );
+}
+
+function getPaymentSearchValue(payment: StatementItem) {
+  const searchTerms = Object.values(payment)
+    .filter(
+      (value): value is number | string =>
+        typeof value === "number" || typeof value === "string",
+    )
+    .map((value) => String(value));
+
+  if (payment.date) {
+    searchTerms.push(formatMonobankDate(payment.date));
+    searchTerms.push(formatMonobankShortDate(payment.date));
+  }
+
+  if (payment.ccy !== undefined) {
+    searchTerms.push(getMonobankCurrencyLabel(payment.ccy));
+  }
+
+  if (typeof payment.amount === "number") {
+    const normalizedAmount = (payment.amount / 100).toFixed(2);
+
+    searchTerms.push(formatMonobankMoney(payment.amount, payment.ccy));
+    searchTerms.push(normalizedAmount);
+    searchTerms.push(normalizedAmount.replace(/\.00$/, ""));
+  }
+
+  if (typeof payment.profitAmount === "number") {
+    const normalizedProfit = (payment.profitAmount / 100).toFixed(2);
+
+    searchTerms.push(formatMonobankMoney(payment.profitAmount, payment.ccy));
+    searchTerms.push(normalizedProfit);
+    searchTerms.push(normalizedProfit.replace(/\.00$/, ""));
+  }
+
+  return searchTerms.map((value) => value.toLowerCase()).join(" ");
 }
 
 export function MonobankPaymentsDataTable({
@@ -71,6 +119,7 @@ export function MonobankPaymentsDataTable({
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     [],
   );
+  const [searchValue, setSearchValue] = React.useState("");
   const [columnVisibility, setColumnVisibility] =
     React.useState<VisibilityState>(defaultColumnVisibility);
   const [rowSelection, setRowSelection] = React.useState<RowSelectionState>({});
@@ -90,18 +139,34 @@ export function MonobankPaymentsDataTable({
     () =>
       [
         String(data.length),
+        searchValue.trim().toLowerCase(),
         ...sorting.map(({ id, desc }) => `${id}:${desc ? "desc" : "asc"}`),
         ...columnFilters.map(({ id, value }) => `${id}:${String(value)}`),
       ].join("|"),
-    [columnFilters, data.length, sorting],
+    [columnFilters, data.length, searchValue, sorting],
   );
 
+  const searchedData = React.useMemo(() => {
+    const query = searchValue.trim().toLowerCase();
+
+    if (!query) {
+      return data;
+    }
+
+    return data.filter((payment) =>
+      getPaymentSearchValue(payment).includes(query),
+    );
+  }, [data, searchValue]);
+
   const table = useReactTable({
-    data,
+    data: searchedData,
     columns: monobankPaymentsColumns,
     autoResetPageIndex: false,
     enableRowSelection: true,
     getRowId: getPaymentRowId,
+    meta: {
+      onOpenPaymentDetails: handleOpenPaymentDetails,
+    },
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
     getCoreRowModel: getCoreRowModel(),
@@ -142,8 +207,6 @@ export function MonobankPaymentsDataTable({
       : [];
   }, [columnFilters]);
 
-  const searchValue =
-    (table.getColumn("search")?.getFilterValue() as string | undefined) ?? "";
   const selectedRowCount = table.getFilteredSelectedRowModel().rows.length;
   const filteredRowCount = table.getFilteredRowModel().rows.length;
   const hasCustomColumnVisibility = Object.entries(columnVisibility).some(
@@ -161,6 +224,9 @@ export function MonobankPaymentsDataTable({
     .getFilteredSelectedRowModel()
     .rows.map((row) => row.original.invoiceId ?? row.original.reference)
     .filter((value): value is string => Boolean(value));
+  const selectedRows = table
+    .getFilteredSelectedRowModel()
+    .rows.map((row) => row.original);
 
   const successfulCount = React.useMemo(
     () => data.filter((item) => isSuccessfulPaymentStatus(item.status)).length,
@@ -193,11 +259,11 @@ export function MonobankPaymentsDataTable({
 
   const resetTable = React.useCallback(() => {
     setSorting([]);
+    setSearchValue("");
     setColumnFilters([]);
     setRowSelection({});
     setColumnVisibility(defaultColumnVisibility);
-    table.getColumn("search")?.setFilterValue("");
-  }, [table]);
+  }, []);
 
   const resolvedEmptyMessage = React.useMemo(() => {
     if (isLoading && data.length === 0) {
@@ -224,9 +290,15 @@ export function MonobankPaymentsDataTable({
         <div className="w-full">
           <MonobankPaymentsTableToolbar
             table={table}
+            exportFilePrefix={
+              detailsSource === "provider" ? "statement" : "payment-history"
+            }
             isLoading={isLoading}
             onRefresh={onRefresh}
+            onSearchChange={setSearchValue}
             selectedStatuses={selectedStatuses}
+            selectedRows={selectedRows}
+            searchValue={searchValue}
             statusOptions={statusOptions}
             selectedPaymentIdentifiers={selectedPaymentIdentifiers}
             hasActiveState={hasActiveState}
@@ -244,7 +316,6 @@ export function MonobankPaymentsDataTable({
 
           <MonobankPaymentsTableContent
             table={table}
-            onRowOpen={handleOpenPaymentDetails}
             emptyActionLabel={emptyActionLabel}
             emptyMessage={resolvedEmptyMessage}
             onEmptyAction={emptyActionLabel ? resetTable : undefined}

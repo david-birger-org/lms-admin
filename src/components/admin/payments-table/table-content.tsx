@@ -18,13 +18,11 @@ export function MonobankPaymentsTableContent({
   emptyMessage = "No results.",
   onEmptyAction,
   table,
-  onRowOpen,
 }: {
   emptyActionLabel?: string;
   emptyMessage?: string;
   onEmptyAction?: () => void;
   table: Table<StatementItem>;
-  onRowOpen: (payment: StatementItem) => void;
 }) {
   return (
     <div className="overflow-hidden rounded-lg border bg-background">
@@ -51,12 +49,13 @@ export function MonobankPaymentsTableContent({
               <TableRow
                 key={row.id}
                 data-state={row.getIsSelected() && "selected"}
-                className="cursor-pointer"
-                onClick={() => onRowOpen(row.original)}
+                aria-selected={row.getIsSelected()}
+                className="cursor-pointer data-[state=selected]:bg-primary/5 data-[state=selected]:hover:bg-primary/10"
+                onClick={() => row.toggleSelected(!row.getIsSelected())}
                 onKeyDown={(event) => {
                   if (event.key === "Enter" || event.key === " ") {
                     event.preventDefault();
-                    onRowOpen(row.original);
+                    row.toggleSelected(!row.getIsSelected());
                   }
                 }}
                 tabIndex={0}

@@ -6,6 +6,7 @@ import {
   CircleAlert,
   CircleCheckBig,
   CircleX,
+  Eye,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -106,22 +107,6 @@ const statusFilterFn: FilterFn<StatementItem> = (
   return typeof status === "string" ? filterValue.includes(status) : false;
 };
 
-const searchFilterFn: FilterFn<StatementItem> = (
-  row,
-  columnId,
-  filterValue,
-) => {
-  const query =
-    typeof filterValue === "string" ? filterValue.trim().toLowerCase() : "";
-
-  if (!query) {
-    return true;
-  }
-
-  const searchValue = row.getValue<string | undefined>(columnId);
-  return typeof searchValue === "string" && searchValue.includes(query);
-};
-
 export const monobankPaymentsColumns: ColumnDef<StatementItem>[] = [
   {
     id: "select",
@@ -155,26 +140,6 @@ export const monobankPaymentsColumns: ColumnDef<StatementItem>[] = [
         <StatusIcon status={row.original.status} />
       </div>
     ),
-  },
-  {
-    id: "search",
-    accessorFn: (row) =>
-      [
-        row.customerName,
-        row.error,
-        row.invoiceId,
-        row.maskedPan,
-        row.reference,
-        row.destination,
-        row.date,
-        row.status,
-      ]
-        .filter((value): value is string => typeof value === "string")
-        .map((value) => value.toLowerCase())
-        .join(" "),
-    filterFn: searchFilterFn,
-    enableHiding: false,
-    enableSorting: false,
   },
   {
     accessorKey: "date",
@@ -252,5 +217,27 @@ export const monobankPaymentsColumns: ColumnDef<StatementItem>[] = [
         {row.original.invoiceId ?? "-"}
       </div>
     ),
+  },
+  {
+    id: "details",
+    header: () => <span className="sr-only">Details</span>,
+    cell: ({ row, table }) => (
+      <div className="flex justify-end">
+        <Button
+          type="button"
+          variant="ghost"
+          size="icon-xs"
+          aria-label={`Open details for ${row.original.invoiceId ?? row.original.reference ?? "payment"}`}
+          onClick={(event) => {
+            event.stopPropagation();
+            table.options.meta?.onOpenPaymentDetails?.(row.original);
+          }}
+        >
+          <Eye />
+        </Button>
+      </div>
+    ),
+    enableSorting: false,
+    enableHiding: false,
   },
 ];
