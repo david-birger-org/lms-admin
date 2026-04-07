@@ -7,6 +7,7 @@ import {
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
 } from "react";
 
@@ -168,12 +169,30 @@ function createPaymentsFeed({
     const [lastFetchedAt, setLastFetchedAt] = useState<number | null>(
       seed?.fetchedAt ?? null,
     );
+    const isMountedRef = useRef(false);
+    const activeRequestIdRef = useRef(0);
+
+    useEffect(() => {
+      isMountedRef.current = true;
+
+      return () => {
+        isMountedRef.current = false;
+        activeRequestIdRef.current += 1;
+      };
+    }, []);
 
     const loadFeed = useCallback(
       async ({
         background = false,
         forceRefresh = false,
       }: LoadFeedOptions = {}) => {
+        if (!isMountedRef.current) {
+          return;
+        }
+
+        const requestId = activeRequestIdRef.current + 1;
+        activeRequestIdRef.current = requestId;
+
         if (!background) {
           setStatus("loading");
           setError(null);
@@ -181,10 +200,25 @@ function createPaymentsFeed({
 
         try {
           const nextSnapshot = await fetchFeed(days, forceRefresh);
+
+          if (
+            !isMountedRef.current ||
+            activeRequestIdRef.current !== requestId
+          ) {
+            return;
+          }
+
           setRows(nextSnapshot.rows);
           setLastFetchedAt(nextSnapshot.fetchedAt);
           setStatus("ready");
         } catch (loadError) {
+          if (
+            !isMountedRef.current ||
+            activeRequestIdRef.current !== requestId
+          ) {
+            return;
+          }
+
           const message =
             loadError instanceof Error ? loadError.message : errorMessage;
           setError(message);

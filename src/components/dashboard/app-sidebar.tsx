@@ -1,4 +1,4 @@
-import { ShieldCheck } from "lucide-react";
+import { LayoutDashboard, ShieldCheck } from "lucide-react";
 import type { ComponentProps } from "react";
 
 import { AccountMenu } from "@/components/auth/account-menu";
@@ -12,7 +12,16 @@ import {
 import type { DashboardAccount } from "@/lib/dashboard-account";
 
 function SidebarAccount({ account }: { account: DashboardAccount }) {
-  return <AccountMenu email={account.email} fullName={account.fullName} />;
+  return (
+    <AccountMenu
+      email={account.email}
+      fullName={account.fullName}
+      settingsHref="/admin/settings"
+      secondaryHref="/dashboard"
+      secondaryLabel="User dashboard"
+      SecondaryIcon={LayoutDashboard}
+    />
+  );
 }
 
 export function AppSidebar({

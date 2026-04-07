@@ -47,11 +47,27 @@ export function usePaymentDetails({
   const previousSummaryStatus = useRef(payment?.status);
   const lastKnownStatus = useRef<string | undefined>(payment?.status);
   const lastKnownModifiedDate = useRef<string | undefined>(undefined);
+  const isMountedRef = useRef(false);
+  const detailsRequestIdRef = useRef(0);
+  const cancellationRequestIdRef = useRef(0);
+
+  useEffect(() => {
+    isMountedRef.current = true;
+
+    return () => {
+      isMountedRef.current = false;
+      detailsRequestIdRef.current += 1;
+      cancellationRequestIdRef.current += 1;
+    };
+  }, []);
 
   const loadDetails = useCallback(async () => {
-    if (!effectiveInvoiceId) {
+    if (!effectiveInvoiceId || !isMountedRef.current) {
       return;
     }
+
+    const requestId = detailsRequestIdRef.current + 1;
+    detailsRequestIdRef.current = requestId;
 
     setIsLoading(true);
     setError(null);
@@ -79,6 +95,10 @@ export function usePaymentDetails({
         payload.status !== lastKnownStatus.current ||
         payload.modifiedDate !== lastKnownModifiedDate.current;
 
+      if (!isMountedRef.current || detailsRequestIdRef.current !== requestId) {
+        return;
+      }
+
       setDetails(payload);
       lastKnownStatus.current = payload.status;
       lastKnownModifiedDate.current = payload.modifiedDate;
@@ -90,6 +110,11 @@ export function usePaymentDetails({
       const message = getPaymentDetailsErrorMessage(loadError);
 
       console.error("Failed to load extended payment details", loadError);
+
+      if (!isMountedRef.current || detailsRequestIdRef.current !== requestId) {
+        return;
+      }
+
       setDetails(null);
 
       if (payment) {
@@ -98,12 +123,18 @@ export function usePaymentDetails({
         setError(message);
       }
     } finally {
-      setIsLoading(false);
+      if (isMountedRef.current && detailsRequestIdRef.current === requestId) {
+        setIsLoading(false);
+      }
     }
   }, [detailsSource, effectiveInvoiceId, onInvoiceChanged, payment]);
 
   const handleOpenChange = useCallback(
     (nextOpen: boolean) => {
+      if (!isMountedRef.current) {
+        return;
+      }
+
       onOpenChange?.(nextOpen);
 
       if (controlledOpen === undefined) {
@@ -126,6 +157,8 @@ export function usePaymentDetails({
 
   useEffect(() => {
     if (previousInvoiceId.current !== effectiveInvoiceId) {
+      detailsRequestIdRef.current += 1;
+      cancellationRequestIdRef.current += 1;
       previousInvoiceId.current = effectiveInvoiceId;
       previousSummaryStatus.current = payment?.status;
       lastKnownStatus.current = payment?.status;
@@ -150,7 +183,12 @@ export function usePaymentDetails({
     isCancelableInvoiceStatus(displayDetails?.status);
 
   const handleCancelInvoice = useCallback(async () => {
-    if (!effectiveInvoiceId || !canCancelInvoice || isCancelling) {
+    if (
+      !effectiveInvoiceId ||
+      !canCancelInvoice ||
+      isCancelling ||
+      !isMountedRef.current
+    ) {
       return;
     }
 
@@ -161,6 +199,9 @@ export function usePaymentDetails({
     ) {
       return;
     }
+
+    const requestId = cancellationRequestIdRef.current + 1;
+    cancellationRequestIdRef.current = requestId;
 
     setIsCancelling(true);
     setCancellationError(null);
@@ -179,6 +220,13 @@ export function usePaymentDetails({
         throw new Error(payload.error ?? "Failed to cancel invoice");
       }
 
+      if (
+        !isMountedRef.current ||
+        cancellationRequestIdRef.current !== requestId
+      ) {
+        return;
+      }
+
       setDetails((current) => {
         const nextDetails = mergeUpdatedDetails({
           current,
@@ -194,9 +242,21 @@ export function usePaymentDetails({
       });
       onInvoiceChanged?.();
     } catch (cancelError) {
+      if (
+        !isMountedRef.current ||
+        cancellationRequestIdRef.current !== requestId
+      ) {
+        return;
+      }
+
       setCancellationError(getCancelErrorMessage(cancelError));
     } finally {
-      setIsCancelling(false);
+      if (
+        isMountedRef.current &&
+        cancellationRequestIdRef.current === requestId
+      ) {
+        setIsCancelling(false);
+      }
     }
   }, [
     canCancelInvoice,

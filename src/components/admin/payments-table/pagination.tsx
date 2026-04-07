@@ -1,4 +1,5 @@
 "use client";
+"use no memo";
 
 import type { Table } from "@tanstack/react-table";
 
@@ -10,11 +11,19 @@ export function MonobankPaymentsTablePagination({
 }: {
   table: Table<StatementItem>;
 }) {
+  const filteredRowCount = table.getFilteredRowModel().rows.length;
+  const visibleSelectedRowCount =
+    table.getFilteredSelectedRowModel().rows.length;
+  const selectedRowCount = table.getSelectedRowModel().rows.length;
+  const selectionLabel =
+    visibleSelectedRowCount === selectedRowCount
+      ? `${selectedRowCount} of ${filteredRowCount} row(s) selected.`
+      : `${visibleSelectedRowCount} of ${filteredRowCount} visible row(s) selected (${selectedRowCount} total).`;
+
   return (
     <div className="flex flex-col gap-2 py-3 sm:flex-row sm:items-center sm:justify-end">
       <div className="flex-1 text-xs text-muted-foreground sm:text-sm">
-        {table.getFilteredSelectedRowModel().rows.length} of{" "}
-        {table.getFilteredRowModel().rows.length} row(s) selected.
+        {selectionLabel}
       </div>
       <div className="flex gap-2 self-end">
         <Button

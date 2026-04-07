@@ -1,4 +1,5 @@
 "use client";
+"use no memo";
 
 import type { Table } from "@tanstack/react-table";
 import { CheckCheck, ChevronDown, RefreshCw, X } from "lucide-react";
@@ -78,7 +79,7 @@ export function MonobankPaymentsTableToolbar({
   onReset: () => void;
   onClearSelection: () => void;
 }) {
-  const selectedRowCount = table.getFilteredSelectedRowModel().rows.length;
+  const selectedRowCount = table.getSelectedRowModel().rows.length;
   const normalizedExportFilePrefix =
     exportFilePrefix
       .trim()
@@ -124,7 +125,7 @@ export function MonobankPaymentsTableToolbar({
   return (
     <div className="flex flex-col gap-2 py-3 md:flex-row md:items-center">
       <Input
-        placeholder="Search invoice, reference, card, or description..."
+        placeholder="Search any payment field..."
         value={searchValue}
         onChange={(event) => onSearchChange(event.target.value)}
         className="h-9 md:max-w-sm"

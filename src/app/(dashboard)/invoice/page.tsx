@@ -1,15 +1,5 @@
-import { MonobankInvoiceForm } from "@/components/admin/MonobankInvoiceForm";
-import {
-  DashboardPage,
-  DashboardSection,
-} from "@/components/dashboard/page-shell";
+import { redirect } from "next/navigation";
 
-export default function InvoicePage() {
-  return (
-    <DashboardPage route="/invoice">
-      <DashboardSection>
-        <MonobankInvoiceForm />
-      </DashboardSection>
-    </DashboardPage>
-  );
+export default function InvoiceRedirectPage() {
+  redirect("/admin/invoice");
 }

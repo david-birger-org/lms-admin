@@ -1,12 +1,14 @@
 "use client";
 
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { useMemo, useState } from "react";
 
 import { AuthCard } from "@/components/auth/auth-card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useRouter } from "@/i18n/routing";
 import { authClient } from "@/lib/auth-client";
 
 function buildAuthHref(path: string, redirectTo: string) {
@@ -19,6 +21,7 @@ function buildAuthHref(path: string, redirectTo: string) {
 }
 
 export function SignUpForm() {
+  const t = useTranslations("auth.signUp");
   const router = useRouter();
   const searchParams = useSearchParams();
   const redirectTo = searchParams.get("redirect_url")?.trim() || "/";
@@ -26,7 +29,6 @@ export function SignUpForm() {
     () => buildAuthHref("/sign-in", redirectTo),
     [redirectTo],
   );
-  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -38,31 +40,30 @@ export function SignUpForm() {
     setError(null);
 
     if (password !== confirmPassword) {
-      setError("Passwords must match.");
+      setError(t("passwordMismatch"));
       return;
     }
 
     setIsSubmitting(true);
 
     try {
+      const derivedName = email.split("@")[0] || email;
       const { error: signUpError } = await authClient.signUp.email({
         callbackURL: redirectTo,
         email,
-        name,
+        name: derivedName,
         password,
       });
 
       if (signUpError) {
-        setError(signUpError.message || "Failed to create account.");
+        setError(signUpError.message || t("error"));
         return;
       }
 
       router.replace(redirectTo);
       router.refresh();
     } catch (error) {
-      setError(
-        error instanceof Error ? error.message : "Failed to create account.",
-      );
+      setError(error instanceof Error ? error.message : t("error"));
     } finally {
       setIsSubmitting(false);
     }
@@ -70,26 +71,15 @@ export function SignUpForm() {
 
   return (
     <AuthCard
-      description="Create a Better Auth account for the admin workspace. Access still requires an approved admin email or role."
+      description={t("description")}
       footerHref={signInHref}
-      footerLabel="Sign in instead"
-      footerText="Already have an account?"
-      title="Create your account"
+      footerLabel={t("footerLabel")}
+      footerText={t("footerText")}
+      title={t("title")}
     >
       <form className="space-y-4" onSubmit={handleSubmit}>
         <div className="space-y-2">
-          <Label htmlFor="name">Full name</Label>
-          <Input
-            autoComplete="name"
-            id="name"
-            onChange={(event) => setName(event.target.value)}
-            placeholder="Ada Lovelace"
-            required
-            value={name}
-          />
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor="email">Email</Label>
+          <Label htmlFor="email">{t("email")}</Label>
           <Input
             autoComplete="email"
             id="email"
@@ -102,7 +92,7 @@ export function SignUpForm() {
           />
         </div>
         <div className="space-y-2">
-          <Label htmlFor="password">Password</Label>
+          <Label htmlFor="password">{t("password")}</Label>
           <Input
             autoComplete="new-password"
             id="password"
@@ -114,7 +104,7 @@ export function SignUpForm() {
           />
         </div>
         <div className="space-y-2">
-          <Label htmlFor="confirmPassword">Confirm password</Label>
+          <Label htmlFor="confirmPassword">{t("confirmPassword")}</Label>
           <Input
             autoComplete="new-password"
             id="confirmPassword"
@@ -131,7 +121,7 @@ export function SignUpForm() {
           </p>
         ) : null}
         <Button className="h-9 w-full" disabled={isSubmitting} type="submit">
-          {isSubmitting ? "Creating account..." : "Create account"}
+          {isSubmitting ? t("submitting") : t("submit")}
         </Button>
       </form>
     </AuthCard>

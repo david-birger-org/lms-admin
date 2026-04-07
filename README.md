@@ -1,6 +1,6 @@
 # LMS Admin
 
-Standalone admin app extracted from the public site workspace. It owns Better Auth locally on `admin.davidbirger.com` and proxies Monobank payment tooling to `lms-sls` as a backend service.
+Standalone app extracted from the public site workspace. It owns Better Auth locally on `app.davidbirger.com` and proxies Monobank payment tooling to `lms-sls` as a backend service.
 
 ## Setup
 

@@ -1,7 +1,7 @@
 "use client";
 
 import { KeyRound, LogOut, ShieldCheck, UserRound } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { toast } from "sonner";
 
@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useRouter } from "@/i18n/routing";
 import { authClient } from "@/lib/auth-client";
 
 export function AccountSettingsPanel({
@@ -26,6 +27,8 @@ export function AccountSettingsPanel({
   fullName: string;
   role: string;
 }) {
+  const t = useTranslations("settings");
+  const accountMenuT = useTranslations("auth.accountMenu");
   const router = useRouter();
   const [name, setName] = useState(fullName);
   const [currentPassword, setCurrentPassword] = useState("");
@@ -39,16 +42,16 @@ export function AccountSettingsPanel({
     event.preventDefault();
     setIsSavingProfile(true);
 
-    const { error } = await authClient.updateUser({ name });
+    const { error } = await authClient.updateUser({ name: name.trim() });
 
     setIsSavingProfile(false);
 
     if (error) {
-      toast.error(error.message || "Failed to update your profile.");
+      toast.error(error.message || t("profile.error"));
       return;
     }
 
-    toast.success("Profile updated.");
+    toast.success(t("profile.updated"));
     router.refresh();
   }
 
@@ -56,7 +59,7 @@ export function AccountSettingsPanel({
     event.preventDefault();
 
     if (newPassword !== confirmPassword) {
-      toast.error("The new passwords do not match.");
+      toast.error(t("password.mismatch"));
       return;
     }
 
@@ -71,14 +74,14 @@ export function AccountSettingsPanel({
     setIsSavingPassword(false);
 
     if (error) {
-      toast.error(error.message || "Failed to update your password.");
+      toast.error(error.message || t("password.error"));
       return;
     }
 
     setCurrentPassword("");
     setNewPassword("");
     setConfirmPassword("");
-    toast.success("Password updated.");
+    toast.success(t("password.updated"));
   }
 
   async function handleSignOut() {
@@ -95,29 +98,27 @@ export function AccountSettingsPanel({
           <CardHeader className="border-b">
             <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
               <UserRound className="size-4" />
-              Profile
+              {t("profile.title")}
             </CardTitle>
-            <CardDescription>
-              Update the display name used across the admin workspace.
-            </CardDescription>
+            <CardDescription>{t("profile.description")}</CardDescription>
           </CardHeader>
           <CardContent className="pt-6">
             <form className="space-y-4" onSubmit={handleProfileSubmit}>
               <div className="space-y-2">
-                <Label htmlFor="settings-name">Full name</Label>
+                <Label htmlFor="settings-name">{t("profile.name")}</Label>
                 <Input
                   id="settings-name"
                   onChange={(event) => setName(event.target.value)}
-                  required
+                  placeholder={t("profile.namePlaceholder")}
                   value={name}
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="settings-email">Email</Label>
+                <Label htmlFor="settings-email">{t("profile.email")}</Label>
                 <Input disabled id="settings-email" value={email} />
               </div>
               <Button className="h-9" disabled={isSavingProfile} type="submit">
-                {isSavingProfile ? "Saving..." : "Save profile"}
+                {isSavingProfile ? t("profile.saving") : t("profile.save")}
               </Button>
             </form>
           </CardContent>
@@ -127,16 +128,16 @@ export function AccountSettingsPanel({
           <CardHeader className="border-b">
             <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
               <KeyRound className="size-4" />
-              Password
+              {t("password.title")}
             </CardTitle>
-            <CardDescription>
-              Change your password and revoke any other active sessions.
-            </CardDescription>
+            <CardDescription>{t("password.description")}</CardDescription>
           </CardHeader>
           <CardContent className="pt-6">
             <form className="space-y-4" onSubmit={handlePasswordSubmit}>
               <div className="space-y-2">
-                <Label htmlFor="current-password">Current password</Label>
+                <Label htmlFor="current-password">
+                  {t("password.current")}
+                </Label>
                 <Input
                   autoComplete="current-password"
                   id="current-password"
@@ -147,7 +148,7 @@ export function AccountSettingsPanel({
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="new-password">New password</Label>
+                <Label htmlFor="new-password">{t("password.new")}</Label>
                 <Input
                   autoComplete="new-password"
                   id="new-password"
@@ -160,7 +161,7 @@ export function AccountSettingsPanel({
               </div>
               <div className="space-y-2">
                 <Label htmlFor="confirm-new-password">
-                  Confirm new password
+                  {t("password.confirm")}
                 </Label>
                 <Input
                   autoComplete="new-password"
@@ -173,7 +174,9 @@ export function AccountSettingsPanel({
                 />
               </div>
               <Button className="h-9" disabled={isSavingPassword} type="submit">
-                {isSavingPassword ? "Updating..." : "Update password"}
+                {isSavingPassword
+                  ? t("password.submitting")
+                  : t("password.submit")}
               </Button>
             </form>
           </CardContent>
@@ -184,19 +187,17 @@ export function AccountSettingsPanel({
         <CardHeader className="border-b">
           <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
             <ShieldCheck className="size-4" />
-            Session
+            {t("session.title")}
           </CardTitle>
-          <CardDescription>
-            This admin workspace is gated by Better Auth and the admin role.
-          </CardDescription>
+          <CardDescription>{t("session.description")}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4 pt-6">
           <div className="space-y-1 rounded-lg border bg-muted/20 p-4 text-sm">
-            <p className="text-muted-foreground">Role</p>
+            <p className="text-muted-foreground">{t("session.role")}</p>
             <p className="font-medium text-foreground">{role}</p>
           </div>
           <div className="space-y-1 rounded-lg border bg-muted/20 p-4 text-sm">
-            <p className="text-muted-foreground">Email</p>
+            <p className="text-muted-foreground">{t("session.email")}</p>
             <p className="break-all font-medium text-foreground">{email}</p>
           </div>
           <Button
@@ -207,7 +208,9 @@ export function AccountSettingsPanel({
             variant="outline"
           >
             <LogOut className="size-4" />
-            {isSigningOut ? "Signing out..." : "Sign out"}
+            {isSigningOut
+              ? accountMenuT("signingOut")
+              : accountMenuT("signOut")}
           </Button>
         </CardContent>
       </Card>

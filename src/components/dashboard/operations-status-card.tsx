@@ -1,35 +1,18 @@
-import { Activity, ArrowRight, ShieldCheck, Waypoints } from "lucide-react";
+import { Activity, ShieldCheck } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import {
   Card,
   CardContent,
   CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
 
 interface RuntimeCheck {
   label: string;
   ready: boolean;
 }
-
-const routeRows = [
-  {
-    title: "Invoice creation",
-    value: "POST /api/monobank/invoice",
-  },
-  {
-    title: "Invoice status",
-    value: "GET /api/monobank/invoice/status",
-  },
-  {
-    title: "Statement sync",
-    value: "GET /api/monobank/statement",
-  },
-];
 
 export function OperationsStatusCard({ checks }: { checks: RuntimeCheck[] }) {
   const readyCount = checks.filter((check) => check.ready).length;
@@ -42,8 +25,7 @@ export function OperationsStatusCard({ checks }: { checks: RuntimeCheck[] }) {
           Runtime Checks
         </CardTitle>
         <CardDescription>
-          Environment health, auth posture, and API surfaces that support the
-          admin dashboard.
+          Environment keys required by auth and the backend proxy.
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-5 pt-4">
@@ -83,34 +65,7 @@ export function OperationsStatusCard({ checks }: { checks: RuntimeCheck[] }) {
             </div>
           ))}
         </div>
-        <Separator />
-        <div className="space-y-3">
-          <div className="flex items-center gap-2">
-            <Waypoints className="size-4 text-muted-foreground" />
-            <p className="text-sm font-medium">Protected surfaces</p>
-          </div>
-          <div className="space-y-2">
-            {routeRows.map((route) => (
-              <div
-                key={route.value}
-                className="rounded-lg border bg-muted/20 px-3 py-2"
-              >
-                <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">
-                  {route.title}
-                </p>
-                <p className="mt-1 font-mono text-xs text-foreground">
-                  {route.value}
-                </p>
-              </div>
-            ))}
-          </div>
-        </div>
       </CardContent>
-      <CardFooter className="border-t pt-4 text-sm text-muted-foreground">
-        Better Auth runs on the admin app, and every backend proxy request is
-        gated by a local admin session check first.
-        <ArrowRight className="ml-2 size-4" />
-      </CardFooter>
     </Card>
   );
 }

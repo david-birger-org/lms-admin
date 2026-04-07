@@ -1,12 +1,14 @@
 "use client";
 
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { useMemo, useState } from "react";
 
 import { AuthCard } from "@/components/auth/auth-card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useRouter } from "@/i18n/routing";
 import { authClient } from "@/lib/auth-client";
 
 function buildAuthHref(path: string, redirectTo: string) {
@@ -19,6 +21,7 @@ function buildAuthHref(path: string, redirectTo: string) {
 }
 
 export function SignInForm() {
+  const t = useTranslations("auth.signIn");
   const router = useRouter();
   const searchParams = useSearchParams();
   const redirectTo = searchParams.get("redirect_url")?.trim() || "/";
@@ -45,14 +48,14 @@ export function SignInForm() {
       });
 
       if (signInError) {
-        setError(signInError.message || "Failed to sign in.");
+        setError(signInError.message || t("error"));
         return;
       }
 
       router.replace(redirectTo);
       router.refresh();
     } catch (error) {
-      setError(error instanceof Error ? error.message : "Failed to sign in.");
+      setError(error instanceof Error ? error.message : t("error"));
     } finally {
       setIsSubmitting(false);
     }
@@ -60,15 +63,15 @@ export function SignInForm() {
 
   return (
     <AuthCard
-      description="Sign in with your email and password to reach the protected operations workspace."
+      description={t("description")}
       footerHref={signUpHref}
-      footerLabel="Create an account"
-      footerText="Need access first?"
-      title="Welcome back"
+      footerLabel={t("footerLabel")}
+      footerText={t("footerText")}
+      title={t("title")}
     >
       <form className="space-y-4" onSubmit={handleSubmit}>
         <div className="space-y-2">
-          <Label htmlFor="email">Email</Label>
+          <Label htmlFor="email">{t("email")}</Label>
           <Input
             autoComplete="email"
             id="email"
@@ -81,7 +84,7 @@ export function SignInForm() {
           />
         </div>
         <div className="space-y-2">
-          <Label htmlFor="password">Password</Label>
+          <Label htmlFor="password">{t("password")}</Label>
           <Input
             autoComplete="current-password"
             id="password"
@@ -90,9 +93,7 @@ export function SignInForm() {
             type="password"
             value={password}
           />
-          <p className="text-xs text-muted-foreground">
-            You can update your password after signing in.
-          </p>
+          <p className="text-xs text-muted-foreground">{t("passwordHint")}</p>
         </div>
         {error ? (
           <p className="rounded-md border border-destructive/30 bg-destructive/5 px-3 py-2 text-sm text-destructive">
@@ -100,7 +101,7 @@ export function SignInForm() {
           </p>
         ) : null}
         <Button className="h-9 w-full" disabled={isSubmitting} type="submit">
-          {isSubmitting ? "Signing in..." : "Sign in"}
+          {isSubmitting ? t("submitting") : t("submit")}
         </Button>
       </form>
     </AuthCard>

@@ -1,8 +1,10 @@
 import type { LucideIcon } from "lucide-react";
 import {
+  Clock,
   CreditCard,
   History,
   LayoutDashboard,
+  Package,
   ScrollText,
   Settings,
   ShieldCheck,
@@ -17,40 +19,52 @@ export interface DashboardRoute {
 
 export const dashboardRoutes = [
   {
-    href: "/",
+    href: "/admin",
     title: "Overview",
     description:
       "Workspace summary and room for future Vercel analytics blocks.",
     icon: LayoutDashboard,
   },
   {
-    href: "/invoice",
+    href: "/admin/invoice",
     title: "Invoice",
     description: "Create Monobank invoices and copy checkout links quickly.",
     icon: CreditCard,
   },
   {
-    href: "/payment-history",
+    href: "/admin/pending",
+    title: "Pending Invoices",
+    description: "View and manage invoices awaiting payment.",
+    icon: Clock,
+  },
+  {
+    href: "/admin/payment-history",
     title: "Payment History",
     description:
       "Review canonical app payment history from the payments table.",
     icon: History,
   },
   {
-    href: "/statement-audit",
+    href: "/admin/statement-audit",
     title: "Statement Audit",
     description:
       "Inspect the live Monobank statement feed for provider reconciliation.",
     icon: ScrollText,
   },
   {
-    href: "/runtime",
+    href: "/admin/products",
+    title: "Products",
+    description: "Manage products, pricing, and availability.",
+    icon: Package,
+  },
+  {
+    href: "/admin/runtime",
     title: "Runtime",
     description: "Monitor environment readiness and protected API surfaces.",
     icon: ShieldCheck,
   },
   {
-    href: "/settings",
+    href: "/admin/settings",
     title: "Settings",
     description:
       "Manage your Better Auth account, password, and session settings.",

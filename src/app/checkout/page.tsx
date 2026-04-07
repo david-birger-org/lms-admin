@@ -1,0 +1,120 @@
+import { headers } from "next/headers";
+import { redirect } from "next/navigation";
+
+import { CheckoutConfirm } from "@/components/checkout/checkout-confirm";
+import { getAuth } from "@/lib/auth/better-auth";
+import { forwardLmsSlsRequest } from "@/lib/server/lms-sls";
+
+interface CheckoutSearchParams {
+  product?: string;
+  c?: string;
+}
+
+interface ProductPayload {
+  id: string;
+  slug: string;
+  nameUk: string;
+  nameEn: string;
+  pricingType: "fixed" | "on_request";
+  priceUahMinor: number | null;
+  priceUsdMinor: number | null;
+  imageUrl: string | null;
+  active: boolean;
+}
+
+async function fetchProductBySlug(
+  slug: string,
+): Promise<ProductPayload | null> {
+  const response = await forwardLmsSlsRequest({
+    method: "GET",
+    path: "/api/products",
+    search: `?slug=${encodeURIComponent(slug)}`,
+  });
+
+  if (!response.ok) return null;
+
+  const payload = (await response.json().catch(() => null)) as {
+    product?: ProductPayload;
+  } | null;
+
+  return payload?.product ?? null;
+}
+
+function formatPrice(minor: number, currency: "UAH" | "USD") {
+  const major = minor / 100;
+  return new Intl.NumberFormat(currency === "UAH" ? "uk-UA" : "en-US", {
+    style: "currency",
+    currency,
+    maximumFractionDigits: major % 1 === 0 ? 0 : 2,
+  }).format(major);
+}
+
+export default async function CheckoutPage({
+  searchParams,
+}: {
+  searchParams: Promise<CheckoutSearchParams>;
+}) {
+  const params = await searchParams;
+  const slug = params.product?.trim();
+
+  if (!slug)
+    return (
+      <main className="flex min-h-svh items-center justify-center p-6">
+        <p className="text-sm text-muted-foreground">Missing product.</p>
+      </main>
+    );
+
+  const currency: "UAH" | "USD" = params.c === "UAH" ? "UAH" : "USD";
+  const returnPath = `/checkout?product=${encodeURIComponent(slug)}&c=${currency}`;
+
+  const session = await getAuth().api.getSession({ headers: await headers() });
+  if (!session) {
+    redirect(`/sign-up?redirect_url=${encodeURIComponent(returnPath)}`);
+  }
+
+  const product = await fetchProductBySlug(slug);
+  if (!product?.active || product.pricingType !== "fixed")
+    return (
+      <main className="flex min-h-svh items-center justify-center p-6">
+        <p className="text-sm text-muted-foreground">
+          Product not available for direct purchase.
+        </p>
+      </main>
+    );
+
+  const priceMinor =
+    currency === "UAH" ? product.priceUahMinor : product.priceUsdMinor;
+  if (priceMinor === null)
+    return (
+      <main className="flex min-h-svh items-center justify-center p-6">
+        <p className="text-sm text-muted-foreground">
+          No price available for {currency}.
+        </p>
+      </main>
+    );
+
+  const productName = product.nameEn;
+  const priceLabel = formatPrice(priceMinor, currency);
+
+  return (
+    <main className="flex min-h-svh items-center justify-center bg-[radial-gradient(circle_at_top,_rgba(15,23,42,0.08),_transparent_45%),linear-gradient(180deg,_rgba(255,255,255,1),_rgba(248,250,252,1))] px-4 py-10">
+      <div className="w-full max-w-md rounded-xl border bg-background p-6 shadow-sm">
+        <h1 className="text-xl font-semibold">Confirm purchase</h1>
+        <p className="mt-1 text-sm text-muted-foreground">
+          Signed in as {session.user.email}
+        </p>
+        <div className="mt-6 space-y-2">
+          <div className="text-sm text-muted-foreground">Product</div>
+          <div className="text-base font-medium">{productName}</div>
+        </div>
+        <div className="mt-4 flex items-center justify-between">
+          <span className="text-sm text-muted-foreground">Total</span>
+          <span className="text-lg font-semibold">{priceLabel}</span>
+        </div>
+        <div className="mt-6">
+          <CheckoutConfirm productSlug={slug} currency={currency} />
+        </div>
+      </div>
+    </main>
+  );
+}

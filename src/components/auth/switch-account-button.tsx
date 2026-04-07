@@ -1,13 +1,15 @@
 "use client";
 
 import { LogOut } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
+import { useRouter } from "@/i18n/routing";
 import { authClient } from "@/lib/auth-client";
 
 export function SwitchAccountButton() {
+  const t = useTranslations("auth.switchAccount");
   const router = useRouter();
   const [isSigningOut, setIsSigningOut] = useState(false);
 
@@ -25,7 +27,7 @@ export function SwitchAccountButton() {
       onClick={() => void handleSignOut()}
     >
       <LogOut />
-      {isSigningOut ? "Signing out..." : "Switch account"}
+      {isSigningOut ? t("signingOut") : t("label")}
     </Button>
   );
 }

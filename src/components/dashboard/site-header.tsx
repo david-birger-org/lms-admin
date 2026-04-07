@@ -1,31 +1,33 @@
-import { ShieldCheck } from "lucide-react";
-
 import { DashboardHeaderControls } from "@/components/dashboard/dashboard-header-controls";
-import { Badge } from "@/components/ui/badge";
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb";
 import { Separator } from "@/components/ui/separator";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 
 export function SiteHeader() {
   return (
-    <header className="sticky top-0 z-20 flex h-(--header-height) shrink-0 items-center border-b bg-background/90 backdrop-blur-sm">
-      <div className="flex w-full items-center gap-2 px-4 lg:px-6">
+    <header className="flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-12 border-b">
+      <div className="flex w-full items-center gap-2 px-4">
         <SidebarTrigger className="-ml-1" />
-        <Separator
-          orientation="vertical"
-          className="mx-2 data-[orientation=vertical]:h-4"
-        />
-        <div className="min-w-0">
-          <div className="flex items-center gap-2">
-            <h1 className="truncate text-sm font-medium">LMS Admin</h1>
-            <Badge variant="outline" className="hidden md:inline-flex">
-              <ShieldCheck />
-              Protected
-            </Badge>
-          </div>
-          <p className="hidden truncate text-xs text-muted-foreground md:block">
-            Monobank operations workspace
-          </p>
-        </div>
+        <Separator orientation="vertical" className="mr-2 h-4" />
+        <Breadcrumb>
+          <BreadcrumbList>
+            <BreadcrumbItem className="hidden md:block">
+              <BreadcrumbLink href="/admin">LMS Admin</BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator className="hidden md:block" />
+            <BreadcrumbItem>
+              <BreadcrumbPage>Dashboard</BreadcrumbPage>
+            </BreadcrumbItem>
+          </BreadcrumbList>
+        </Breadcrumb>
+        <div className="flex-1" />
         <DashboardHeaderControls />
       </div>
     </header>

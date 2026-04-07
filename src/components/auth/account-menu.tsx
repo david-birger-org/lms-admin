@@ -1,8 +1,8 @@
 "use client";
 
+import type { LucideIcon } from "lucide-react";
 import { LogOut, Settings2 } from "lucide-react";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { useMemo, useState } from "react";
 
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -15,6 +15,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Link, useRouter } from "@/i18n/routing";
 import { authClient } from "@/lib/auth-client";
 
 function getInitials(name: string, email: string) {
@@ -31,10 +32,19 @@ function getInitials(name: string, email: string) {
 export function AccountMenu({
   email,
   fullName,
+  settingsHref,
+  secondaryHref,
+  secondaryLabel,
+  SecondaryIcon,
 }: {
   email: string;
   fullName: string;
+  settingsHref: string;
+  secondaryHref?: string;
+  secondaryLabel?: string;
+  SecondaryIcon?: LucideIcon;
 }) {
+  const t = useTranslations("auth.accountMenu");
   const router = useRouter();
   const initials = useMemo(
     () => getInitials(fullName, email),
@@ -77,10 +87,18 @@ export function AccountMenu({
           <p className="truncate text-muted-foreground">{email}</p>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
+        {secondaryHref && secondaryLabel && SecondaryIcon ? (
+          <DropdownMenuItem asChild>
+            <Link href={secondaryHref}>
+              <SecondaryIcon className="size-4" />
+              {secondaryLabel}
+            </Link>
+          </DropdownMenuItem>
+        ) : null}
         <DropdownMenuItem asChild>
-          <Link href="/settings">
+          <Link href={settingsHref}>
             <Settings2 className="size-4" />
-            Account settings
+            {t("settings")}
           </Link>
         </DropdownMenuItem>
         <DropdownMenuItem
@@ -88,7 +106,7 @@ export function AccountMenu({
           onSelect={() => void handleSignOut()}
         >
           <LogOut className="size-4" />
-          {isSigningOut ? "Signing out..." : "Sign out"}
+          {isSigningOut ? t("signingOut") : t("signOut")}
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

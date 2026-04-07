@@ -27,11 +27,14 @@ export default function UnauthorizedPage() {
         </CardHeader>
         <CardContent className="space-y-4 pt-6">
           <p className="text-sm text-muted-foreground">
-            Your account is signed in, but it does not currently have permission
-            to use this application. Contact an administrator if you believe
-            this is incorrect.
+            Your account is signed in, but it does not have admin permissions
+            for this section. If you are a regular user, you can access your
+            personal dashboard.
           </p>
           <div className="flex flex-wrap gap-2">
+            <Button asChild>
+              <Link href="/dashboard">Go to dashboard</Link>
+            </Button>
             <SwitchAccountButton />
             <Button variant="outline" asChild>
               <Link href="/sign-in">Go to sign-in</Link>

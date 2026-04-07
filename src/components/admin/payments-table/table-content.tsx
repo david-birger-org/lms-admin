@@ -1,6 +1,8 @@
 "use client";
+"use no memo";
 
-import { flexRender, type Table } from "@tanstack/react-table";
+import { flexRender, type Row, type Table } from "@tanstack/react-table";
+import type * as React from "react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -12,6 +14,28 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import type { StatementItem } from "@/lib/monobank";
+
+const interactiveRowSelector = [
+  "a[href]",
+  "button",
+  "input",
+  "select",
+  "textarea",
+  "[role='button']",
+  "[role='checkbox']",
+  "[role='menuitem']",
+  "[data-row-interactive='true']",
+].join(",");
+
+function isInteractiveRowTarget(target: EventTarget | null) {
+  return (
+    target instanceof Element && target.closest(interactiveRowSelector) !== null
+  );
+}
+
+function toggleRowSelection(row: Row<StatementItem>) {
+  row.toggleSelected(!row.getIsSelected());
+}
 
 export function MonobankPaymentsTableContent({
   emptyActionLabel,
@@ -51,11 +75,21 @@ export function MonobankPaymentsTableContent({
                 data-state={row.getIsSelected() && "selected"}
                 aria-selected={row.getIsSelected()}
                 className="cursor-pointer data-[state=selected]:bg-primary/5 data-[state=selected]:hover:bg-primary/10"
-                onClick={() => row.toggleSelected(!row.getIsSelected())}
+                onClick={(event: React.MouseEvent<HTMLTableRowElement>) => {
+                  if (isInteractiveRowTarget(event.target)) {
+                    return;
+                  }
+
+                  toggleRowSelection(row);
+                }}
                 onKeyDown={(event) => {
+                  if (event.target !== event.currentTarget) {
+                    return;
+                  }
+
                   if (event.key === "Enter" || event.key === " ") {
                     event.preventDefault();
-                    row.toggleSelected(!row.getIsSelected());
+                    toggleRowSelection(row);
                   }
                 }}
                 tabIndex={0}

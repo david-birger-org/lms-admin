@@ -117,6 +117,7 @@ export const monobankPaymentsColumns: ColumnDef<StatementItem>[] = [
           (table.getIsSomePageRowsSelected() && "indeterminate")
         }
         onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
+        onClick={(event) => event.stopPropagation()}
         aria-label="Select all"
       />
     ),
@@ -125,6 +126,7 @@ export const monobankPaymentsColumns: ColumnDef<StatementItem>[] = [
         checked={row.getIsSelected()}
         onCheckedChange={(value) => row.toggleSelected(!!value)}
         onClick={(event) => event.stopPropagation()}
+        data-row-interactive="true"
         aria-label="Select row"
       />
     ),
@@ -227,6 +229,7 @@ export const monobankPaymentsColumns: ColumnDef<StatementItem>[] = [
           type="button"
           variant="ghost"
           size="icon-xs"
+          data-row-interactive="true"
           aria-label={`Open details for ${row.original.invoiceId ?? row.original.reference ?? "payment"}`}
           onClick={(event) => {
             event.stopPropagation();

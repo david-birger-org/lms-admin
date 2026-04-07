@@ -1,0 +1,188 @@
+{
+  "metadata": {
+    "title": "David Birger App",
+    "description": "Захищений застосунок David Birger для клієнтів та адміністрування."
+  },
+  "auth": {
+    "badge": "David Birger app",
+    "signIn": {
+      "title": "З поверненням",
+      "description": "Увійдіть за допомогою email і пароля, щоб продовжити в David Birger app.",
+      "footerText": "Потрібен доступ?",
+      "footerLabel": "Створити акаунт",
+      "email": "Email",
+      "password": "Пароль",
+      "passwordHint": "Після входу ви зможете змінити пароль.",
+      "submit": "Увійти",
+      "submitting": "Вхід...",
+      "error": "Не вдалося увійти."
+    },
+    "signUp": {
+      "title": "Створіть акаунт",
+      "description": "Створіть акаунт David Birger app. Доступ до адмінки все ще обмежений затвердженими email або ролями.",
+      "footerText": "Вже є акаунт?",
+      "footerLabel": "Увійти",
+      "email": "Email",
+      "password": "Пароль",
+      "confirmPassword": "Підтвердіть пароль",
+      "submit": "Створити акаунт",
+      "submitting": "Створення акаунта...",
+      "passwordMismatch": "Паролі мають збігатися.",
+      "error": "Не вдалося створити акаунт."
+    },
+    "accountMenu": {
+      "settings": "Налаштування акаунта",
+      "signOut": "Вийти",
+      "signingOut": "Вихід..."
+    },
+    "switchAccount": {
+      "label": "Змінити акаунт",
+      "signingOut": "Вихід..."
+    }
+  },
+  "navigation": {
+    "dashboard": {
+      "label": "Операції",
+      "workspaceTitle": "David Birger App",
+      "workspaceSubtitle": "Робочий простір Monobank",
+      "userDashboard": "Дашборд користувача",
+      "adminWorkspace": "Адмін-простір",
+      "routes": {
+        "overview": {
+          "title": "Огляд",
+          "description": "Зведення робочого простору та місце для майбутніх блоків аналітики Vercel."
+        },
+        "invoice": {
+          "title": "Інвойс",
+          "description": "Створюйте інвойси Monobank і швидко копіюйте checkout-посилання."
+        },
+        "pending": {
+          "title": "Очікують оплату",
+          "description": "Переглядайте та керуйте інвойсами, які очікують на оплату."
+        },
+        "paymentHistory": {
+          "title": "Історія оплат",
+          "description": "Переглядайте канонічну історію оплат застосунку з таблиці payments."
+        },
+        "statementAudit": {
+          "title": "Аудит виписки",
+          "description": "Перевіряйте live-виписку Monobank для звірки з провайдером."
+        },
+        "products": {
+          "title": "Продукти",
+          "description": "Керуйте продуктами, цінами та доступністю."
+        },
+        "runtime": {
+          "title": "Середовище",
+          "description": "Відстежуйте готовність середовища та захищених API."
+        },
+        "settings": {
+          "title": "Налаштування",
+          "description": "Керуйте акаунтом Better Auth, паролем і налаштуваннями сесії."
+        }
+      },
+      "header": {
+        "app": "David Birger App",
+        "section": "Адмінка"
+      }
+    },
+    "cabinet": {
+      "label": "Меню",
+      "title": "Мій дашборд",
+      "header": {
+        "dashboard": "Дашборд",
+        "section": "Мій акаунт"
+      },
+      "routes": {
+        "overview": {
+          "title": "Огляд",
+          "description": "Ваш персональний дашборд."
+        },
+        "purchases": {
+          "title": "Покупки",
+          "description": "Переглядайте придбані продукти та історію оплат."
+        },
+        "settings": {
+          "title": "Налаштування",
+          "description": "Керуйте профілем акаунта та безпекою сесії."
+        }
+      }
+    },
+    "protected": "Захищено"
+  },
+  "theme": {
+    "label": "Тема",
+    "options": {
+      "neutral": "Нейтральна",
+      "blue": "Синя",
+      "green": "Зелена",
+      "amber": "Бурштинова",
+      "mono": "Моно"
+    },
+    "mode": {
+      "toggle": "Перемкнути колірний режим",
+      "light": "Перемкнути на світлу тему",
+      "dark": "Перемкнути на темну тему"
+    }
+  },
+  "language": {
+    "label": "Мова"
+  },
+  "dashboardHome": {
+    "accountTitle": "Акаунт",
+    "signedInAs": "Ви увійшли як {email}",
+    "purchasesTitle": "Мої покупки",
+    "purchasesDescription": "Переглядайте продукти, які ви придбали, та їхній статус.",
+    "viewPurchases": "Переглянути покупки"
+  },
+  "settings": {
+    "title": "Налаштування акаунта",
+    "descriptionAdmin": "Оновлюйте профіль Better Auth та безпеку сесії, не виходячи з адмін-простору.",
+    "descriptionUser": "Оновлюйте профіль Better Auth та безпеку сесії.",
+    "profile": {
+      "title": "Профіль",
+      "description": "Оновіть ім'я, яке використовується в застосунку.",
+      "name": "Повне ім'я",
+      "namePlaceholder": "Необов'язково",
+      "email": "Email",
+      "save": "Зберегти профіль",
+      "saving": "Збереження...",
+      "updated": "Профіль оновлено.",
+      "error": "Не вдалося оновити профіль."
+    },
+    "password": {
+      "title": "Пароль",
+      "description": "Змініть пароль і відкличте всі інші активні сесії.",
+      "current": "Поточний пароль",
+      "new": "Новий пароль",
+      "confirm": "Підтвердіть новий пароль",
+      "submit": "Оновити пароль",
+      "submitting": "Оновлення...",
+      "updated": "Пароль оновлено.",
+      "mismatch": "Нові паролі не збігаються.",
+      "error": "Не вдалося оновити пароль."
+    },
+    "session": {
+      "title": "Сесія",
+      "description": "Цей робочий простір захищений Better Auth і роллю admin.",
+      "role": "Роль",
+      "email": "Email"
+    }
+  },
+  "unauthorized": {
+    "title": "Доступ обмежено",
+    "description": "Цей робочий простір доступний лише користувачам із роллю Better Auth `admin`.",
+    "body": "Ви вже увійшли в акаунт, але він не має прав адміністратора для цього розділу. Якщо ви звичайний користувач, ви можете перейти до свого дашборду.",
+    "dashboard": "Перейти до дашборду",
+    "signIn": "Перейти до входу"
+  },
+  "checkout": {
+    "missingProduct": "Відсутній продукт.",
+    "notAvailable": "Продукт недоступний для прямої покупки.",
+    "missingPrice": "Немає ціни для {currency}.",
+    "title": "Підтвердіть покупку",
+    "signedInAs": "Ви увійшли як {email}",
+    "product": "Продукт",
+    "total": "Разом"
+  }
+}

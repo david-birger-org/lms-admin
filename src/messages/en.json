@@ -1,0 +1,188 @@
+{
+  "metadata": {
+    "title": "David Birger App",
+    "description": "Protected David Birger application for customers and admin operations."
+  },
+  "auth": {
+    "badge": "David Birger app",
+    "signIn": {
+      "title": "Welcome back",
+      "description": "Sign in with your email and password to continue to the David Birger app.",
+      "footerText": "Need access first?",
+      "footerLabel": "Create an account",
+      "email": "Email",
+      "password": "Password",
+      "passwordHint": "You can update your password after signing in.",
+      "submit": "Sign in",
+      "submitting": "Signing in...",
+      "error": "Failed to sign in."
+    },
+    "signUp": {
+      "title": "Create your account",
+      "description": "Create your David Birger app account. Admin access is still limited to approved emails or roles.",
+      "footerText": "Already have an account?",
+      "footerLabel": "Sign in instead",
+      "email": "Email",
+      "password": "Password",
+      "confirmPassword": "Confirm password",
+      "submit": "Create account",
+      "submitting": "Creating account...",
+      "passwordMismatch": "Passwords must match.",
+      "error": "Failed to create account."
+    },
+    "accountMenu": {
+      "settings": "Account settings",
+      "signOut": "Sign out",
+      "signingOut": "Signing out..."
+    },
+    "switchAccount": {
+      "label": "Switch account",
+      "signingOut": "Signing out..."
+    }
+  },
+  "navigation": {
+    "dashboard": {
+      "label": "Operations",
+      "workspaceTitle": "David Birger App",
+      "workspaceSubtitle": "Monobank workspace",
+      "userDashboard": "User dashboard",
+      "adminWorkspace": "Admin workspace",
+      "routes": {
+        "overview": {
+          "title": "Overview",
+          "description": "Workspace summary and room for future Vercel analytics blocks."
+        },
+        "invoice": {
+          "title": "Invoice",
+          "description": "Create Monobank invoices and copy checkout links quickly."
+        },
+        "pending": {
+          "title": "Pending Invoices",
+          "description": "View and manage invoices awaiting payment."
+        },
+        "paymentHistory": {
+          "title": "Payment History",
+          "description": "Review canonical app payment history from the payments table."
+        },
+        "statementAudit": {
+          "title": "Statement Audit",
+          "description": "Inspect the live Monobank statement feed for provider reconciliation."
+        },
+        "products": {
+          "title": "Products",
+          "description": "Manage products, pricing, and availability."
+        },
+        "runtime": {
+          "title": "Runtime",
+          "description": "Monitor environment readiness and protected API surfaces."
+        },
+        "settings": {
+          "title": "Settings",
+          "description": "Manage your Better Auth account, password, and session settings."
+        }
+      },
+      "header": {
+        "app": "David Birger App",
+        "section": "Admin"
+      }
+    },
+    "cabinet": {
+      "label": "Menu",
+      "title": "My Dashboard",
+      "header": {
+        "dashboard": "Dashboard",
+        "section": "My Account"
+      },
+      "routes": {
+        "overview": {
+          "title": "Overview",
+          "description": "Your personal dashboard."
+        },
+        "purchases": {
+          "title": "Purchases",
+          "description": "View your purchased products and payment history."
+        },
+        "settings": {
+          "title": "Settings",
+          "description": "Manage your account profile and session security."
+        }
+      }
+    },
+    "protected": "Protected"
+  },
+  "theme": {
+    "label": "Theme",
+    "options": {
+      "neutral": "Neutral",
+      "blue": "Blue",
+      "green": "Green",
+      "amber": "Amber",
+      "mono": "Mono"
+    },
+    "mode": {
+      "toggle": "Toggle color mode",
+      "light": "Switch to light mode",
+      "dark": "Switch to dark mode"
+    }
+  },
+  "language": {
+    "label": "Language"
+  },
+  "dashboardHome": {
+    "accountTitle": "Account",
+    "signedInAs": "Signed in as {email}",
+    "purchasesTitle": "My Purchases",
+    "purchasesDescription": "View products you've purchased and their status.",
+    "viewPurchases": "View purchases"
+  },
+  "settings": {
+    "title": "Account settings",
+    "descriptionAdmin": "Update your Better Auth profile and session security without leaving the admin workspace.",
+    "descriptionUser": "Update your Better Auth profile and session security.",
+    "profile": {
+      "title": "Profile",
+      "description": "Update the display name used across the app.",
+      "name": "Full name",
+      "namePlaceholder": "Optional",
+      "email": "Email",
+      "save": "Save profile",
+      "saving": "Saving...",
+      "updated": "Profile updated.",
+      "error": "Failed to update your profile."
+    },
+    "password": {
+      "title": "Password",
+      "description": "Change your password and revoke any other active sessions.",
+      "current": "Current password",
+      "new": "New password",
+      "confirm": "Confirm new password",
+      "submit": "Update password",
+      "submitting": "Updating...",
+      "updated": "Password updated.",
+      "mismatch": "The new passwords do not match.",
+      "error": "Failed to update your password."
+    },
+    "session": {
+      "title": "Session",
+      "description": "This workspace is gated by Better Auth and the admin role.",
+      "role": "Role",
+      "email": "Email"
+    }
+  },
+  "unauthorized": {
+    "title": "Access restricted",
+    "description": "This workspace is limited to users with the Better Auth `admin` role.",
+    "body": "Your account is signed in, but it does not have admin permissions for this section. If you are a regular user, you can access your personal dashboard.",
+    "dashboard": "Go to dashboard",
+    "signIn": "Go to sign-in"
+  },
+  "checkout": {
+    "missingProduct": "Missing product.",
+    "notAvailable": "Product not available for direct purchase.",
+    "missingPrice": "No price available for {currency}.",
+    "title": "Confirm purchase",
+    "signedInAs": "Signed in as {email}",
+    "product": "Product",
+    "total": "Total"
+  }
+}

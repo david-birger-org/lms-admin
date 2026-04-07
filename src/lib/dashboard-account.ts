@@ -13,9 +13,10 @@ export function getDashboardAccount(
 ): DashboardAccount {
   const email = user?.email ?? "Protected session";
   const fallbackName = email.includes("@") ? email.split("@")[0] : email;
+  const fullName = user?.name?.trim();
 
   return {
     email,
-    fullName: user?.name ?? fallbackName,
+    fullName: fullName || fallbackName,
   };
 }

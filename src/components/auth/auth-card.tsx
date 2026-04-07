@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { useTranslations } from "next-intl";
 
 import {
   Card,
@@ -8,6 +8,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { Link } from "@/i18n/routing";
 
 export function AuthCard({
   children,
@@ -24,11 +25,13 @@ export function AuthCard({
   footerText: string;
   title: string;
 }) {
+  const t = useTranslations("auth");
+
   return (
     <Card className="w-full max-w-md border-border/70 shadow-lg">
       <CardHeader className="space-y-2 border-b">
         <div className="inline-flex w-fit rounded-full border bg-muted/30 px-3 py-1 text-[11px] font-medium uppercase tracking-[0.18em] text-muted-foreground">
-          David Birger admin
+          {t("badge")}
         </div>
         <CardTitle className="text-2xl">{title}</CardTitle>
         <CardDescription>{description}</CardDescription>

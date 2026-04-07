@@ -6,6 +6,7 @@ import { Pool } from "pg";
 
 import { isAdminEmail } from "@/lib/auth/admin";
 import { env } from "@/lib/env";
+import { upsertLmsSlsAppUser } from "@/lib/server/lms-sls-app-users";
 
 declare global {
   var __lmsAdminAuth: AuthInstance | undefined;
@@ -20,7 +21,7 @@ function createAuth() {
       },
       useSecureCookies: process.env.NODE_ENV === "production",
     },
-    appName: "LMS Admin",
+    appName: "David Birger App",
     baseURL: normalizeBaseUrl(env.betterAuthUrl),
     database: getPool(),
     databaseHooks: {
@@ -32,6 +33,20 @@ function createAuth() {
               role: isAdminEmail(user.email) ? "admin" : "user",
             },
           }),
+          after: async (user) => {
+            try {
+              await upsertLmsSlsAppUser({
+                authUserId: user.id,
+                email: user.email,
+                fullName: user.name,
+              });
+            } catch (error) {
+              console.error(
+                "Failed to upsert app_users row in lms-sls after signup",
+                error,
+              );
+            }
+          },
         },
         update: {
           before: async (user) => {

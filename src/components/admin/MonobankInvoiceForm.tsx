@@ -58,6 +58,7 @@ export function MonobankInvoiceForm({
 }) {
   const [customerName, setCustomerName] = useState("");
   const [description, setDescription] = useState("");
+  const [redirectUrl, setRedirectUrl] = useState("");
   const [amount, setAmount] = useState("100");
   const [currency, setCurrency] = useState<SupportedCurrency>("UAH");
   const [selectedExpirationPreset, setSelectedExpirationPreset] = useState(
@@ -88,6 +89,7 @@ export function MonobankInvoiceForm({
     description,
     expirationMinutes,
     output,
+    redirectUrl,
     useCustomExpiration,
   });
   const { idempotencyKey, renewIdempotencyKey } =
@@ -121,6 +123,7 @@ export function MonobankInvoiceForm({
           currency,
           validitySeconds,
           output,
+          redirectUrl: redirectUrl.trim() || undefined,
         }),
       });
 
@@ -194,6 +197,23 @@ export function MonobankInvoiceForm({
                   placeholder="Payment for coaching package"
                   className="min-h-28"
                   required
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="redirectUrl">
+                  Redirect URL{" "}
+                  <span className="text-muted-foreground font-normal">
+                    (optional)
+                  </span>
+                </Label>
+                <Input
+                  className="h-9"
+                  id="redirectUrl"
+                  type="url"
+                  value={redirectUrl}
+                  onChange={(event) => setRedirectUrl(event.target.value)}
+                  placeholder="https://example.com/thank-you"
                 />
               </div>
             </div>
