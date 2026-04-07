@@ -1,4 +1,4 @@
-import { LayoutDashboard, ShieldCheck } from "lucide-react";
+import { ShieldCheck } from "lucide-react";
 import type { ComponentProps } from "react";
 
 import { AccountMenu } from "@/components/auth/account-menu";
@@ -19,7 +19,6 @@ function SidebarAccount({ account }: { account: DashboardAccount }) {
       settingsHref="/admin/settings"
       secondaryHref="/dashboard"
       secondaryLabel="User dashboard"
-      SecondaryIcon={LayoutDashboard}
     />
   );
 }

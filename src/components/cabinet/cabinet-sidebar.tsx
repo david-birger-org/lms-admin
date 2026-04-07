@@ -1,4 +1,4 @@
-import { ShieldCheck, User } from "lucide-react";
+import { User } from "lucide-react";
 import { useTranslations } from "next-intl";
 import type { ComponentProps } from "react";
 
@@ -52,7 +52,6 @@ export function CabinetSidebar({
           secondaryLabel={
             showAdminLink ? dashboardT("adminWorkspace") : undefined
           }
-          SecondaryIcon={showAdminLink ? ShieldCheck : undefined}
         />
       </SidebarFooter>
     </Sidebar>

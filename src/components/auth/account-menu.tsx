@@ -1,7 +1,6 @@
 "use client";
 
-import type { LucideIcon } from "lucide-react";
-import { LogOut, Settings2 } from "lucide-react";
+import { LayoutDashboard, LogOut, Settings2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useMemo, useState } from "react";
 
@@ -35,14 +34,12 @@ export function AccountMenu({
   settingsHref,
   secondaryHref,
   secondaryLabel,
-  SecondaryIcon,
 }: {
   email: string;
   fullName: string;
   settingsHref: string;
   secondaryHref?: string;
   secondaryLabel?: string;
-  SecondaryIcon?: LucideIcon;
 }) {
   const t = useTranslations("auth.accountMenu");
   const router = useRouter();
@@ -87,10 +84,10 @@ export function AccountMenu({
           <p className="truncate text-muted-foreground">{email}</p>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
-        {secondaryHref && secondaryLabel && SecondaryIcon ? (
+        {secondaryHref && secondaryLabel ? (
           <DropdownMenuItem asChild>
             <Link href={secondaryHref}>
-              <SecondaryIcon className="size-4" />
+              <LayoutDashboard className="size-4" />
               {secondaryLabel}
             </Link>
           </DropdownMenuItem>
