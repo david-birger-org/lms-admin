@@ -19,7 +19,7 @@
     },
     "signUp": {
       "title": "Create your account",
-      "description": "Create your David Birger app account. Admin access is still limited to approved emails or roles.",
+      "description": "Create your David Birger app account.",
       "footerText": "Already have an account?",
       "footerLabel": "Sign in instead",
       "email": "Email",

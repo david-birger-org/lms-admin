@@ -6,14 +6,10 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 
 interface CheckoutConfirmProps {
-  productSlug: string;
-  currency: "UAH" | "USD";
+  checkoutToken: string;
 }
 
-export function CheckoutConfirm({
-  productSlug,
-  currency,
-}: CheckoutConfirmProps) {
+export function CheckoutConfirm({ checkoutToken }: CheckoutConfirmProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -22,15 +18,10 @@ export function CheckoutConfirm({
     setError(null);
 
     try {
-      const redirectUrl =
-        typeof window !== "undefined"
-          ? `${window.location.origin}/dashboard/purchases`
-          : undefined;
-
       const response = await fetch("/api/checkout", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ productSlug, currency, redirectUrl }),
+        body: JSON.stringify({ checkoutToken }),
       });
 
       const data = (await response.json().catch(() => null)) as {

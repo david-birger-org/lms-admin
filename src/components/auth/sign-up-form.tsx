@@ -8,6 +8,7 @@ import { AuthCard } from "@/components/auth/auth-card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { stripLocalePrefix } from "@/i18n/locale";
 import { useRouter } from "@/i18n/routing";
 import { authClient } from "@/lib/auth-client";
 
@@ -25,6 +26,7 @@ export function SignUpForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const redirectTo = searchParams.get("redirect_url")?.trim() || "/";
+  const navigationTarget = stripLocalePrefix(redirectTo);
   const signInHref = useMemo(
     () => buildAuthHref("/sign-in", redirectTo),
     [redirectTo],
@@ -49,7 +51,7 @@ export function SignUpForm() {
     try {
       const derivedName = email.split("@")[0] || email;
       const { error: signUpError } = await authClient.signUp.email({
-        callbackURL: redirectTo,
+        callbackURL: navigationTarget,
         email,
         name: derivedName,
         password,
@@ -60,7 +62,7 @@ export function SignUpForm() {
         return;
       }
 
-      router.replace(redirectTo);
+      router.replace(navigationTarget);
       router.refresh();
     } catch (error) {
       setError(error instanceof Error ? error.message : t("error"));

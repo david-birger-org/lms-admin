@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 
 import { CheckoutConfirm } from "@/components/checkout/checkout-confirm";
 import { getAuth } from "@/lib/auth/better-auth";
+import { createCheckoutToken } from "@/lib/server/checkout-token";
 import { forwardLmsSlsRequest } from "@/lib/server/lms-sls";
 
 interface CheckoutSearchParams {
@@ -20,6 +21,11 @@ interface ProductPayload {
   priceUsdMinor: number | null;
   imageUrl: string | null;
   active: boolean;
+}
+
+function buildLocalizedPath(path: string, locale?: string) {
+  if (!locale) return path;
+  return `/${locale}${path}`;
 }
 
 async function fetchProductBySlug(
@@ -49,9 +55,11 @@ function formatPrice(minor: number, currency: "UAH" | "USD") {
   }).format(major);
 }
 
-export default async function CheckoutPage({
+export async function CheckoutPageContent({
+  locale,
   searchParams,
 }: {
+  locale?: string;
   searchParams: Promise<CheckoutSearchParams>;
 }) {
   const params = await searchParams;
@@ -65,11 +73,16 @@ export default async function CheckoutPage({
     );
 
   const currency: "UAH" | "USD" = params.c === "UAH" ? "UAH" : "USD";
-  const returnPath = `/checkout?product=${encodeURIComponent(slug)}&c=${currency}`;
+  const returnPath = buildLocalizedPath(
+    `/checkout?product=${encodeURIComponent(slug)}&c=${currency}`,
+    locale,
+  );
 
   const session = await getAuth().api.getSession({ headers: await headers() });
   if (!session) {
-    redirect(`/sign-up?redirect_url=${encodeURIComponent(returnPath)}`);
+    redirect(
+      `${buildLocalizedPath("/sign-up", locale)}?redirect_url=${encodeURIComponent(returnPath)}`,
+    );
   }
 
   const product = await fetchProductBySlug(slug);
@@ -95,6 +108,12 @@ export default async function CheckoutPage({
 
   const productName = product.nameEn;
   const priceLabel = formatPrice(priceMinor, currency);
+  const checkoutToken = createCheckoutToken({
+    currency,
+    locale,
+    productSlug: slug,
+    userId: session.user.id,
+  });
 
   return (
     <main className="flex min-h-svh items-center justify-center bg-[radial-gradient(circle_at_top,_rgba(15,23,42,0.08),_transparent_45%),linear-gradient(180deg,_rgba(255,255,255,1),_rgba(248,250,252,1))] px-4 py-10">
@@ -112,9 +131,17 @@ export default async function CheckoutPage({
           <span className="text-lg font-semibold">{priceLabel}</span>
         </div>
         <div className="mt-6">
-          <CheckoutConfirm productSlug={slug} currency={currency} />
+          <CheckoutConfirm checkoutToken={checkoutToken} />
         </div>
       </div>
     </main>
   );
+}
+
+export default async function CheckoutPage({
+  searchParams,
+}: {
+  searchParams: Promise<CheckoutSearchParams>;
+}) {
+  return <CheckoutPageContent searchParams={searchParams} />;
 }
