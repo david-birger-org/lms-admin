@@ -41,9 +41,13 @@ async function fetchProductBySlug(
 
   const payload = (await response.json().catch(() => null)) as {
     product?: ProductPayload;
+    products?: ProductPayload[];
   } | null;
 
-  return payload?.product ?? null;
+  if (payload?.product) return payload.product;
+
+  const products = Array.isArray(payload?.products) ? payload.products : [];
+  return products.find((product) => product.slug === slug) ?? null;
 }
 
 function formatPrice(minor: number, currency: "UAH" | "USD") {
