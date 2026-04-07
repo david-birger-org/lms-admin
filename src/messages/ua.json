@@ -19,7 +19,7 @@
     },
     "signUp": {
       "title": "Створіть акаунт",
-      "description": "Створіть акаунт David Birger app. Доступ до адмінки все ще обмежений затвердженими email або ролями.",
+      "description": "Створіть акаунт David Birger app.",
       "footerText": "Вже є акаунт?",
       "footerLabel": "Увійти",
       "email": "Email",

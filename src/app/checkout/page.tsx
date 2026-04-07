@@ -37,16 +37,35 @@ async function fetchProductBySlug(
     search: `?slug=${encodeURIComponent(slug)}`,
   });
 
-  if (!response.ok) return null;
+  const payload = response.ok
+    ? ((await response.json().catch(() => null)) as {
+        product?: ProductPayload;
+        products?: ProductPayload[];
+      } | null)
+    : null;
 
-  const payload = (await response.json().catch(() => null)) as {
+  if (payload?.product) return payload.product;
+
+  const directProducts = Array.isArray(payload?.products) ? payload.products : [];
+  const directMatch = directProducts.find((product) => product.slug === slug);
+  if (directMatch) return directMatch;
+
+  const listResponse = await forwardLmsSlsRequest({
+    method: "GET",
+    path: "/api/products",
+  });
+  if (!listResponse.ok) return null;
+
+  const listPayload = (await listResponse.json().catch(() => null)) as {
     product?: ProductPayload;
     products?: ProductPayload[];
   } | null;
 
-  if (payload?.product) return payload.product;
+  if (listPayload?.product?.slug === slug) return listPayload.product;
 
-  const products = Array.isArray(payload?.products) ? payload.products : [];
+  const products = Array.isArray(listPayload?.products)
+    ? listPayload.products
+    : [];
   return products.find((product) => product.slug === slug) ?? null;
 }
 
