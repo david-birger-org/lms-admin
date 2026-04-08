@@ -72,10 +72,6 @@
           "title": "Продукти",
           "description": "Керуйте продуктами, цінами та доступністю."
         },
-        "runtime": {
-          "title": "Середовище",
-          "description": "Відстежуйте готовність середовища та захищених API."
-        },
         "settings": {
           "title": "Налаштування",
           "description": "Керуйте акаунтом Better Auth, паролем і налаштуваннями сесії."
@@ -221,16 +217,6 @@
       "attention": "Увага",
       "requiredKeysChecked": "Обов'язкові ключі перевірено",
       "description": "Сервіси авторизації та бекенду доступні."
-    },
-    "runtimeCard": {
-      "title": "Перевірки середовища",
-      "description": "Змінні середовища, потрібні для Auth і бекенд-проксі.",
-      "readinessScore": "Оцінка готовності",
-      "requiredKeysDetected": "Виявлено {readyCount} з {totalCount} обов'язкових ключів",
-      "healthy": "Справно",
-      "review": "Перевірити",
-      "ready": "Готово",
-      "missing": "Відсутній"
     },
     "products": {
       "title": "Продукти",

@@ -72,10 +72,6 @@
           "title": "Products",
           "description": "Manage products, pricing, and availability."
         },
-        "runtime": {
-          "title": "Runtime",
-          "description": "Monitor environment readiness and protected API surfaces."
-        },
         "settings": {
           "title": "Settings",
           "description": "Manage your Better Auth account, password, and session settings."
@@ -221,16 +217,6 @@
       "attention": "Attention",
       "requiredKeysChecked": "Required keys verified",
       "description": "Auth and backend services are reachable."
-    },
-    "runtimeCard": {
-      "title": "Runtime checks",
-      "description": "Environment variables required by Auth and the backend proxy.",
-      "readinessScore": "Readiness score",
-      "requiredKeysDetected": "{readyCount} of {totalCount} required keys detected",
-      "healthy": "Healthy",
-      "review": "Review",
-      "ready": "Ready",
-      "missing": "Missing"
     },
     "products": {
       "title": "Products",
