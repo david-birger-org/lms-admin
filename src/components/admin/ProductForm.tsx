@@ -3,19 +3,14 @@
 import { useTranslations } from "next-intl";
 import type { FormEvent } from "react";
 import { useState } from "react";
+import { ChevronDownIcon } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
+import { cn } from "@/lib/utils";
 
 export interface ProductFormData {
   slug: string;
@@ -23,15 +18,30 @@ export interface ProductFormData {
   nameEn: string;
   descriptionUk: string;
   descriptionEn: string;
-  priceMinor: number;
-  currency: string;
+  priceUahMinor: number | null;
+  priceUsdMinor: number | null;
+  pricingType: "fixed" | "on_request";
   imageUrl: string | null;
   active: boolean;
   sortOrder: number;
 }
 
+interface ProductFormInitialData {
+  active?: boolean;
+  descriptionEn?: string | null;
+  descriptionUk?: string | null;
+  imageUrl?: string | null;
+  nameEn?: string;
+  nameUk?: string;
+  priceUahMinor?: number | null;
+  priceUsdMinor?: number | null;
+  pricingType?: "fixed" | "on_request";
+  slug?: string;
+  sortOrder?: number;
+}
+
 interface ProductFormProps {
-  initialData?: Partial<ProductFormData>;
+  initialData?: ProductFormInitialData;
   onSubmit: (data: ProductFormData) => void;
   isSubmitting: boolean;
   submitLabel: string;
@@ -60,10 +70,15 @@ export function ProductForm({
   const [descriptionUk, setDescriptionUk] = useState(
     initialData?.descriptionUk ?? "",
   );
-  const [priceDisplay, setPriceDisplay] = useState(
-    initialData?.priceMinor ? String(initialData.priceMinor / 100) : "",
+  const [pricingType, setPricingType] = useState<"fixed" | "on_request">(
+    initialData?.pricingType ?? "fixed",
   );
-  const [currency, setCurrency] = useState(initialData?.currency ?? "UAH");
+  const [priceUahDisplay, setPriceUahDisplay] = useState(
+    initialData?.priceUahMinor ? String(initialData.priceUahMinor / 100) : "",
+  );
+  const [priceUsdDisplay, setPriceUsdDisplay] = useState(
+    initialData?.priceUsdMinor ? String(initialData.priceUsdMinor / 100) : "",
+  );
   const [imageUrl, setImageUrl] = useState(initialData?.imageUrl ?? "");
   const [active, setActive] = useState(initialData?.active ?? true);
   const [sortOrder, setSortOrder] = useState(
@@ -79,8 +94,13 @@ export function ProductForm({
   function handleSubmit(event: FormEvent) {
     event.preventDefault();
 
-    const parsedPrice = Number(priceDisplay);
-    if (!Number.isFinite(parsedPrice) || parsedPrice <= 0) return;
+    const parsedPriceUah = Number(priceUahDisplay);
+    const parsedPriceUsd = Number(priceUsdDisplay);
+
+    if (pricingType === "fixed") {
+      if (!Number.isFinite(parsedPriceUah) || parsedPriceUah <= 0) return;
+      if (!Number.isFinite(parsedPriceUsd) || parsedPriceUsd <= 0) return;
+    }
 
     onSubmit({
       slug: slug.trim(),
@@ -88,8 +108,11 @@ export function ProductForm({
       nameUk: nameUk.trim(),
       descriptionEn: descriptionEn.trim(),
       descriptionUk: descriptionUk.trim(),
-      priceMinor: Math.round(parsedPrice * 100),
-      currency,
+      priceUahMinor:
+        pricingType === "fixed" ? Math.round(parsedPriceUah * 100) : null,
+      priceUsdMinor:
+        pricingType === "fixed" ? Math.round(parsedPriceUsd * 100) : null,
+      pricingType,
       imageUrl: imageUrl.trim() || null,
       active,
       sortOrder: Number(sortOrder) || 0,
@@ -163,34 +186,23 @@ export function ProductForm({
 
       <div className="grid gap-4 sm:grid-cols-3">
         <div className="space-y-2">
-          <Label htmlFor="price">{t("price")}</Label>
-          <Input
-            className="h-9"
-            id="price"
-            type="number"
-            inputMode="decimal"
-            min="0.01"
-            step="0.01"
-            value={priceDisplay}
-            onChange={(e) => setPriceDisplay(e.target.value)}
-            placeholder="5000"
-            required
-          />
-        </div>
-        <div className="space-y-2">
-          <Label>{t("currency")}</Label>
-          <Select
-            value={currency}
-            onValueChange={(value) => setCurrency(value as string)}
-          >
-            <SelectTrigger className="h-9 w-full">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="UAH">UAH</SelectItem>
-              <SelectItem value="USD">USD</SelectItem>
-            </SelectContent>
-          </Select>
+          <Label htmlFor="pricingType">{t("pricingType")}</Label>
+          <div className="relative">
+            <select
+              id="pricingType"
+              value={pricingType}
+              onChange={(event) =>
+                setPricingType(event.target.value as "fixed" | "on_request")
+              }
+              className={cn(
+                "flex h-9 w-full appearance-none items-center justify-between rounded-3xl border border-transparent bg-input/50 px-3 py-2 pr-9 text-sm whitespace-nowrap transition-[color,box-shadow,background-color] outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/30 disabled:cursor-not-allowed disabled:opacity-50",
+              )}
+            >
+              <option value="fixed">{t("pricingTypeFixed")}</option>
+              <option value="on_request">{t("pricingTypeOnRequest")}</option>
+            </select>
+            <ChevronDownIcon className="pointer-events-none absolute top-1/2 right-3 size-4 -translate-y-1/2 text-muted-foreground" />
+          </div>
         </div>
         <div className="space-y-2">
           <Label htmlFor="sortOrder">{t("sortOrder")}</Label>
@@ -204,6 +216,41 @@ export function ProductForm({
           />
         </div>
       </div>
+
+      {pricingType === "fixed" ? (
+        <div className="grid gap-4 sm:grid-cols-2">
+          <div className="space-y-2">
+            <Label htmlFor="priceUah">{t("priceUah")}</Label>
+            <Input
+              className="h-9"
+              id="priceUah"
+              type="number"
+              inputMode="decimal"
+              min="0.01"
+              step="0.01"
+              value={priceUahDisplay}
+              onChange={(e) => setPriceUahDisplay(e.target.value)}
+              placeholder="5000"
+              required
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="priceUsd">{t("priceUsd")}</Label>
+            <Input
+              className="h-9"
+              id="priceUsd"
+              type="number"
+              inputMode="decimal"
+              min="0.01"
+              step="0.01"
+              value={priceUsdDisplay}
+              onChange={(e) => setPriceUsdDisplay(e.target.value)}
+              placeholder="100"
+              required
+            />
+          </div>
+        </div>
+      ) : null}
 
       <div className="space-y-2">
         <Label htmlFor="imageUrl">

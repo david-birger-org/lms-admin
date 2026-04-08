@@ -1,8 +1,8 @@
 "use client";
 
-import { Check, Pencil, Plus, Trash2, X } from "lucide-react";
+import { Pencil, Plus, Trash2 } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import { toast } from "sonner";
 
 import { Badge } from "@/components/ui/badge";
@@ -44,106 +44,35 @@ function replaceProduct(products: Product[], nextProduct: Product) {
 
 function formatPrice(priceMinor: number, currency: string) {
   const amount = priceMinor / 100;
-  return `${amount.toLocaleString("uk-UA", { minimumFractionDigits: 0 })} ${currency}`;
+  return `${amount.toLocaleString("uk-UA", { minimumFractionDigits: 0, maximumFractionDigits: 2 })} ${currency}`;
 }
 
-function InlinePriceCell({
-  product,
-  onSave,
-}: {
-  product: Product;
-  onSave: (id: string, priceMinor: number) => Promise<void>;
-}) {
+function ProductPricingCell({ product }: { product: Product }) {
   const t = useTranslations("admin.products");
-  const [isEditing, setIsEditing] = useState(false);
-  const [value, setValue] = useState(String(product.priceMinor / 100));
-  const [isSaving, setIsSaving] = useState(false);
-  const inputRef = useRef<HTMLInputElement>(null);
 
-  useEffect(() => {
-    if (isEditing) inputRef.current?.select();
-  }, [isEditing]);
-
-  function handleCancel() {
-    setValue(String(product.priceMinor / 100));
-    setIsEditing(false);
-  }
-
-  async function handleSave() {
-    const parsed = Number(value);
-    if (!Number.isFinite(parsed) || parsed <= 0) {
-      toast.error(t("invalidPrice"));
-      return;
-    }
-
-    const newMinor = Math.round(parsed * 100);
-    if (newMinor === product.priceMinor) {
-      setIsEditing(false);
-      return;
-    }
-
-    setIsSaving(true);
-    try {
-      await onSave(product.id, newMinor);
-      setIsEditing(false);
-    } finally {
-      setIsSaving(false);
-    }
-  }
-
-  function handleKeyDown(e: React.KeyboardEvent) {
-    if (e.key === "Enter") handleSave();
-    if (e.key === "Escape") handleCancel();
-  }
-
-  if (isEditing)
+  if (product.pricingType === "on_request")
     return (
-      <div className="flex items-center justify-end gap-1">
-        <input
-          ref={inputRef}
-          type="number"
-          step="0.01"
-          min="0.01"
-          value={value}
-          onChange={(e) => setValue(e.target.value)}
-          onKeyDown={handleKeyDown}
-          disabled={isSaving}
-          className="h-7 w-24 rounded border bg-background px-2 text-right font-mono text-sm outline-none focus:ring-1 focus:ring-ring"
-        />
-        <span className="text-xs text-muted-foreground">
-          {product.currency}
-        </span>
-        <Button
-          variant="ghost"
-          size="icon-sm"
-          className="size-6"
-          onClick={handleSave}
-          disabled={isSaving}
-        >
-          <Check className="size-3" />
-        </Button>
-        <Button
-          variant="ghost"
-          size="icon-sm"
-          className="size-6"
-          onClick={handleCancel}
-          disabled={isSaving}
-        >
-          <X className="size-3" />
-        </Button>
+      <div className="text-right">
+        <Badge variant="outline">{t("pricingType.onRequest")}</Badge>
       </div>
     );
 
   return (
-    <button
-      type="button"
-      onClick={() => setIsEditing(true)}
-      className="inline-flex items-center gap-1 rounded px-1 py-0.5 font-mono text-sm transition-colors hover:bg-muted"
-      title={t("editPrice")}
-    >
-      {formatPrice(product.priceMinor, product.currency)}
-      <Pencil className="size-3 text-muted-foreground opacity-0 transition-opacity group-hover/row:opacity-100" />
-    </button>
+    <div className="space-y-1 text-right">
+      <div>
+        <Badge variant="secondary">{t("pricingType.fixed")}</Badge>
+      </div>
+      <p className="font-mono text-sm">
+        {product.priceUahMinor === null
+          ? "-"
+          : formatPrice(product.priceUahMinor, "UAH")}
+      </p>
+      <p className="font-mono text-sm text-muted-foreground">
+        {product.priceUsdMinor === null
+          ? "-"
+          : formatPrice(product.priceUsdMinor, "USD")}
+      </p>
+    </div>
   );
 }
 
@@ -282,35 +211,6 @@ export function ProductsManager({
     }
   }
 
-  async function handleUpdatePrice(id: string, priceMinor: number) {
-    try {
-      const response = await fetch(`/api/products?id=${id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ priceMinor }),
-      });
-
-      const result = (await response.json()) as {
-        product?: Product;
-        error?: string;
-      };
-
-      if (!response.ok)
-        throw new Error(result.error ?? t("errors.updatePrice"));
-
-      if (!result.product)
-        throw new Error(result.error ?? t("errors.updatePrice"));
-      const nextProduct = result.product;
-
-      setProducts((current) => replaceProduct(current, nextProduct));
-      toast.success(t("success.priceUpdated"));
-    } catch (error) {
-      toast.error(
-        error instanceof Error ? error.message : t("errors.updatePrice"),
-      );
-    }
-  }
-
   return (
     <>
       <Card className="shadow-xs">
@@ -356,7 +256,7 @@ export function ProductsManager({
               </TableHeader>
               <TableBody>
                 {products.map((product) => (
-                  <TableRow key={product.id} className="group/row">
+                  <TableRow key={product.id}>
                     <TableCell className="pl-3 sm:pl-6">
                       <div>
                         <p className="font-medium">{product.nameEn}</p>
@@ -369,10 +269,7 @@ export function ProductsManager({
                       <code className="text-xs">{product.slug}</code>
                     </TableCell>
                     <TableCell className="text-right">
-                      <InlinePriceCell
-                        product={product}
-                        onSave={handleUpdatePrice}
-                      />
+                      <ProductPricingCell product={product} />
                     </TableCell>
                     <TableCell className="text-center">
                       <Badge

@@ -232,10 +232,14 @@
       "columns": {
         "name": "Name",
         "slug": "Slug",
-        "price": "Price",
+        "price": "Pricing",
         "status": "Status",
         "order": "Order",
         "actions": "Actions"
+      },
+      "pricingType": {
+        "fixed": "Fixed price",
+        "onRequest": "On request"
       },
       "status": {
         "active": "Active",
@@ -287,8 +291,11 @@
         "slug": "Slug",
         "descriptionEn": "Description (EN)",
         "descriptionUk": "Description (UA)",
-        "price": "Price",
-        "currency": "Currency",
+        "pricingType": "Pricing type",
+        "pricingTypeFixed": "Fixed price",
+        "pricingTypeOnRequest": "On request",
+        "priceUah": "Price (UAH)",
+        "priceUsd": "Price (USD)",
         "sortOrder": "Sort order",
         "imageUrl": "Image URL",
         "optional": "(optional)",

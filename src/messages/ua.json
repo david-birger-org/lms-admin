@@ -232,10 +232,14 @@
       "columns": {
         "name": "Назва",
         "slug": "Слаг",
-        "price": "Ціна",
+        "price": "Тип і ціна",
         "status": "Статус",
         "order": "Порядок",
         "actions": "Дії"
+      },
+      "pricingType": {
+        "fixed": "Фіксована ціна",
+        "onRequest": "За запитом"
       },
       "status": {
         "active": "Активний",
@@ -287,8 +291,11 @@
         "slug": "Слаг",
         "descriptionEn": "Опис (EN)",
         "descriptionUk": "Опис (UA)",
-        "price": "Ціна",
-        "currency": "Валюта",
+        "pricingType": "Тип ціни",
+        "pricingTypeFixed": "Фіксована ціна",
+        "pricingTypeOnRequest": "За запитом",
+        "priceUah": "Ціна (UAH)",
+        "priceUsd": "Ціна (USD)",
         "sortOrder": "Порядок",
         "imageUrl": "URL зображення",
         "optional": "(необов'язково)",

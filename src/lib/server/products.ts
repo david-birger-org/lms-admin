@@ -13,14 +13,15 @@ import {
 export interface AdminProductRecord {
   active: boolean;
   createdAt: string;
-  currency: string;
-  descriptionEn: string;
-  descriptionUk: string;
+  descriptionEn: string | null;
+  descriptionUk: string | null;
   id: string;
   imageUrl: string | null;
   nameEn: string;
   nameUk: string;
-  priceMinor: number;
+  priceUahMinor: number | null;
+  priceUsdMinor: number | null;
+  pricingType: "fixed" | "on_request";
   slug: string;
   sortOrder: number;
   updatedAt: string;
