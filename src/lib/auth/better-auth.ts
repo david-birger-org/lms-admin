@@ -4,7 +4,6 @@ import { dash } from "@better-auth/infra";
 import { betterAuth } from "better-auth";
 import { Pool } from "pg";
 
-import { isAdminEmail } from "@/lib/auth/admin";
 import { env } from "@/lib/env";
 import { upsertLmsSlsAppUser } from "@/lib/server/lms-sls-app-users";
 
@@ -27,12 +26,7 @@ function createAuth() {
     databaseHooks: {
       user: {
         create: {
-          before: async (user) => ({
-            data: {
-              ...user,
-              role: isAdminEmail(user.email) ? "admin" : "user",
-            },
-          }),
+          before: async (user) => ({ data: user }),
           after: async (user) => {
             try {
               await upsertLmsSlsAppUser({
@@ -49,18 +43,7 @@ function createAuth() {
           },
         },
         update: {
-          before: async (user) => {
-            if (typeof user.email !== "string") {
-              return { data: user };
-            }
-
-            return {
-              data: {
-                ...user,
-                role: isAdminEmail(user.email) ? "admin" : "user",
-              },
-            };
-          },
+          before: async (user) => ({ data: user }),
         },
       },
     },
@@ -228,6 +211,10 @@ function getPool() {
   }
 
   return globalThis.__lmsAdminAuthPool;
+}
+
+export function getAuthDbPool() {
+  return getPool();
 }
 
 export function getAuth() {
