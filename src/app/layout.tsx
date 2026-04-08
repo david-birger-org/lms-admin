@@ -34,7 +34,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning className={inter.variable}>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} theme-default antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <NextIntlClientProvider locale="en" messages={enMessages}>
           <ThemeProvider attribute="class" defaultTheme="system" enableSystem>

@@ -57,6 +57,7 @@ function TooltipContent({
         sideOffset={sideOffset}
         side={side}
         align={align}
+        style={{ zIndex: 100 }}
       >
         <TooltipPrimitive.Popup
           data-slot="tooltip-content"
