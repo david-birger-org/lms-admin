@@ -158,6 +158,14 @@ export function MonobankPaymentsDataTable({
     [],
   );
 
+  const handleDetailsOpenChange = React.useCallback((open: boolean) => {
+    setDetailsOpen(open);
+
+    if (!open) {
+      setActivePayment(null);
+    }
+  }, []);
+
   const table = useReactTable({
     data,
     columns: monobankPaymentsColumns,
@@ -191,45 +199,60 @@ export function MonobankPaymentsDataTable({
     },
   });
 
-  const statusOptions = React.useMemo(
-    () =>
-      [
-        ...new Set(data.map((item) => item.status).filter(Boolean)),
-      ].sort() as string[],
-    [data],
-  );
-
-  const selectedStatuses = React.useMemo(() => {
-    const value = columnFilters.find((filter) => filter.id === "status")?.value;
-
-    return Array.isArray(value)
-      ? value.filter((item): item is string => typeof item === "string")
-      : [];
-  }, [columnFilters]);
-
-  const selectedRowsModel = table.getSelectedRowModel();
-  const selectedRowCount = selectedRowsModel.rows.length;
-  const filteredRowCount = table.getFilteredRowModel().rows.length;
   const statusColumn = table.getColumn("status");
-  const hasCustomColumnVisibility = table
-    .getAllLeafColumns()
-    .some(
-      (column) =>
-        column.getCanHide() &&
-        column.getIsVisible() !== getDefaultColumnVisibility(column.id),
-    );
 
-  const hasActiveState =
-    selectedStatuses.length > 0 ||
-    searchValue.trim().length > 0 ||
-    sorting.length > 0 ||
-    selectedRowCount > 0 ||
-    hasCustomColumnVisibility;
+  const tableDerivations = React.useMemo(() => {
+    const statusOptions = [
+      ...new Set(data.map((item) => item.status).filter(Boolean)),
+    ].sort() as string[];
+    const selectedStatusesValue = columnFilters.find(
+      (filter) => filter.id === "status",
+    )?.value;
+    const selectedStatuses = Array.isArray(selectedStatusesValue)
+      ? selectedStatusesValue.filter(
+          (item): item is string => typeof item === "string",
+        )
+      : [];
+    const selectedRowsModel = table.getSelectedRowModel();
+    const filteredRowCount = table.getFilteredRowModel().rows.length;
+    const hasCustomColumnVisibility = table
+      .getAllLeafColumns()
+      .some(
+        (column) =>
+          column.getCanHide() &&
+          column.getIsVisible() !== getDefaultColumnVisibility(column.id),
+      );
+    const selectedRows = selectedRowsModel.rows.map((row) => row.original);
+    const selectedPaymentIdentifiers = selectedRows
+      .map((row) => row.invoiceId ?? row.reference)
+      .filter((value): value is string => Boolean(value));
+    const selectedRowCount = selectedRows.length;
+    const hasActiveState =
+      selectedStatuses.length > 0 ||
+      searchValue.trim().length > 0 ||
+      sorting.length > 0 ||
+      selectedRowCount > 0 ||
+      hasCustomColumnVisibility;
 
-  const selectedPaymentIdentifiers = selectedRowsModel.rows
-    .map((row) => row.original.invoiceId ?? row.original.reference)
-    .filter((value): value is string => Boolean(value));
-  const selectedRows = selectedRowsModel.rows.map((row) => row.original);
+    return {
+      filteredRowCount,
+      hasActiveState,
+      selectedPaymentIdentifiers,
+      selectedRowCount,
+      selectedRows,
+      selectedStatuses,
+      statusOptions,
+    };
+  }, [columnFilters, data, searchValue, sorting, table]);
+
+  const {
+    filteredRowCount,
+    hasActiveState,
+    selectedPaymentIdentifiers,
+    selectedRows,
+    selectedStatuses,
+    statusOptions,
+  } = tableDerivations;
 
   const successfulCount = React.useMemo(
     () => data.filter((item) => isSuccessfulPaymentStatus(item.status)).length,
@@ -319,15 +342,17 @@ export function MonobankPaymentsDataTable({
             onEmptyAction={emptyActionLabel ? resetTable : undefined}
           />
 
-          <MonobankPaymentDetailsPopover
-            invoiceId={activePayment?.invoiceId}
-            payment={activePayment ?? undefined}
-            detailsSource={detailsSource}
-            open={detailsOpen}
-            onOpenChange={setDetailsOpen}
-            onInvoiceChanged={onInvoiceChanged}
-            hideTrigger
-          />
+          {activePayment ? (
+            <MonobankPaymentDetailsPopover
+              invoiceId={activePayment.invoiceId}
+              payment={activePayment}
+              detailsSource={detailsSource}
+              open={detailsOpen}
+              onOpenChange={handleDetailsOpenChange}
+              onInvoiceChanged={onInvoiceChanged}
+              hideTrigger
+            />
+          ) : null}
 
           <MonobankPaymentsTablePagination table={table} />
         </div>

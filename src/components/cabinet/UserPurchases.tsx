@@ -1,9 +1,8 @@
 "use client";
 
-import { Loader2, PackageOpen } from "lucide-react";
+import { PackageOpen } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
-import { useCallback, useEffect, useState } from "react";
-import { toast } from "sonner";
+import { useState } from "react";
 
 import { Badge } from "@/components/ui/badge";
 import {
@@ -21,22 +20,9 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import type { UserPurchaseRecord } from "@/lib/server/user-purchases";
 
-interface Purchase {
-  id: string;
-  status: string;
-  amountMinor: number;
-  profitAmountMinor: number | null;
-  currency: string;
-  description: string;
-  createdAt: string;
-  updatedAt: string;
-  productId: string | null;
-  productSlug: string | null;
-  productNameUk: string | null;
-  productNameEn: string | null;
-  productImageUrl: string | null;
-}
+type Purchase = UserPurchaseRecord;
 
 function formatPrice(priceMinor: number, currency: string) {
   const amount = priceMinor / 100;
@@ -64,33 +50,14 @@ const statusVariants: Record<
   reversed: "destructive",
 };
 
-export function UserPurchases() {
-  const [purchases, setPurchases] = useState<Purchase[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+export function UserPurchases({
+  initialPurchases,
+}: {
+  initialPurchases: Purchase[];
+}) {
+  const [purchases] = useState<Purchase[]>(initialPurchases);
   const locale = useLocale();
   const t = useTranslations("purchases");
-
-  const fetchPurchases = useCallback(async () => {
-    try {
-      const response = await fetch("/api/user/purchases");
-      const data = (await response.json()) as {
-        purchases?: Purchase[];
-        error?: string;
-      };
-
-      if (!response.ok) throw new Error(data.error ?? t("failedToFetch"));
-
-      setPurchases(data.purchases ?? []);
-    } catch (error) {
-      toast.error(error instanceof Error ? error.message : t("failedToLoad"));
-    } finally {
-      setIsLoading(false);
-    }
-  }, [t]);
-
-  useEffect(() => {
-    fetchPurchases();
-  }, [fetchPurchases]);
 
   return (
     <Card className="shadow-xs">
@@ -100,11 +67,7 @@ export function UserPurchases() {
       </CardHeader>
 
       <CardContent className="p-0">
-        {isLoading ? (
-          <div className="flex items-center justify-center py-12">
-            <Loader2 className="size-5 animate-spin text-muted-foreground" />
-          </div>
-        ) : purchases.length === 0 ? (
+        {purchases.length === 0 ? (
           <div className="flex flex-col items-center gap-3 py-12 text-center">
             <PackageOpen className="size-8 text-muted-foreground/50" />
             <div>

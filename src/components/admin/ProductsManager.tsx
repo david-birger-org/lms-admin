@@ -1,8 +1,8 @@
 "use client";
 
-import { Check, Loader2, Pencil, Plus, Trash2, X } from "lucide-react";
+import { Check, Pencil, Plus, Trash2, X } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 
 import { Badge } from "@/components/ui/badge";
@@ -30,23 +30,16 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import type { AdminProductRecord } from "@/lib/server/products";
 
 import { ProductForm, type ProductFormData } from "./ProductForm";
 
-interface Product {
-  id: string;
-  slug: string;
-  nameUk: string;
-  nameEn: string;
-  descriptionUk: string;
-  descriptionEn: string;
-  priceMinor: number;
-  currency: string;
-  imageUrl: string | null;
-  active: boolean;
-  sortOrder: number;
-  createdAt: string;
-  updatedAt: string;
+type Product = AdminProductRecord;
+
+function replaceProduct(products: Product[], nextProduct: Product) {
+  return products.map((item) =>
+    item.id === nextProduct.id ? nextProduct : item,
+  );
 }
 
 function formatPrice(priceMinor: number, currency: string) {
@@ -154,37 +147,18 @@ function InlinePriceCell({
   );
 }
 
-export function ProductsManager() {
+export function ProductsManager({
+  initialProducts,
+}: {
+  initialProducts: Product[];
+}) {
   const t = useTranslations("admin.products");
-  const [products, setProducts] = useState<Product[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [products, setProducts] = useState<Product[]>(initialProducts);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<Product | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
-
-  const fetchProducts = useCallback(async () => {
-    try {
-      const response = await fetch("/api/products");
-      const data = (await response.json()) as {
-        products?: Product[];
-        error?: string;
-      };
-
-      if (!response.ok) throw new Error(data.error ?? t("errors.fetch"));
-
-      setProducts(data.products ?? []);
-    } catch (error) {
-      toast.error(error instanceof Error ? error.message : t("errors.load"));
-    } finally {
-      setIsLoading(false);
-    }
-  }, [t]);
-
-  useEffect(() => {
-    fetchProducts();
-  }, [fetchProducts]);
 
   async function handleCreate(data: ProductFormData) {
     setIsSubmitting(true);
@@ -203,9 +177,12 @@ export function ProductsManager() {
 
       if (!response.ok) throw new Error(result.error ?? t("errors.create"));
 
+      if (!result.product) throw new Error(t("errors.create"));
+      const nextProduct = result.product;
+
+      setProducts((current) => [nextProduct, ...current]);
       toast.success(t("success.created"));
       setIsCreateOpen(false);
-      await fetchProducts();
     } catch (error) {
       toast.error(
         error instanceof Error ? error.message : t("errors.createProduct"),
@@ -233,9 +210,12 @@ export function ProductsManager() {
 
       if (!response.ok) throw new Error(result.error ?? t("errors.update"));
 
+      if (!result.product) throw new Error(t("errors.update"));
+      const nextProduct = result.product;
+
+      setProducts((current) => replaceProduct(current, nextProduct));
       toast.success(t("success.updated"));
       setEditingProduct(null);
-      await fetchProducts();
     } catch (error) {
       toast.error(
         error instanceof Error ? error.message : t("errors.updateProduct"),
@@ -261,9 +241,11 @@ export function ProductsManager() {
 
       if (!response.ok) throw new Error(result.error ?? t("errors.delete"));
 
+      setProducts((current) =>
+        current.filter((item) => item.id !== deleteTarget.id),
+      );
       toast.success(t("success.deleted"));
       setDeleteTarget(null);
-      await fetchProducts();
     } catch (error) {
       toast.error(
         error instanceof Error ? error.message : t("errors.deleteProduct"),
@@ -288,10 +270,13 @@ export function ProductsManager() {
 
       if (!response.ok) throw new Error(result.error ?? t("errors.update"));
 
+      if (!result.product) throw new Error(result.error ?? t("errors.update"));
+      const nextProduct = result.product;
+
+      setProducts((current) => replaceProduct(current, nextProduct));
       toast.success(
         product.active ? t("success.hidden") : t("success.visible"),
       );
-      await fetchProducts();
     } catch (error) {
       toast.error(error instanceof Error ? error.message : t("errors.toggle"));
     }
@@ -313,8 +298,12 @@ export function ProductsManager() {
       if (!response.ok)
         throw new Error(result.error ?? t("errors.updatePrice"));
 
+      if (!result.product)
+        throw new Error(result.error ?? t("errors.updatePrice"));
+      const nextProduct = result.product;
+
+      setProducts((current) => replaceProduct(current, nextProduct));
       toast.success(t("success.priceUpdated"));
-      await fetchProducts();
     } catch (error) {
       toast.error(
         error instanceof Error ? error.message : t("errors.updatePrice"),
@@ -339,11 +328,7 @@ export function ProductsManager() {
         </CardHeader>
 
         <CardContent className="p-0">
-          {isLoading ? (
-            <div className="flex items-center justify-center py-12">
-              <Loader2 className="size-5 animate-spin text-muted-foreground" />
-            </div>
-          ) : products.length === 0 ? (
+          {products.length === 0 ? (
             <div className="py-12 text-center text-sm text-muted-foreground">
               {t("empty")}
             </div>

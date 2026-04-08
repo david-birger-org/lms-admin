@@ -9,6 +9,7 @@ const nextIntlMiddleware = createMiddleware(routing);
 
 const PUBLIC_PATH_PREFIXES = [
   "/api/auth",
+  "/checkout",
   "/sign-in",
   "/sign-up",
   "/unauthorized",

@@ -39,38 +39,13 @@ async function fetchProductBySlug(
     search: `?slug=${encodeURIComponent(slug)}`,
   });
 
-  const payload = response.ok
-    ? ((await response.json().catch(() => null)) as {
-        product?: ProductPayload;
-        products?: ProductPayload[];
-      } | null)
-    : null;
+  if (!response.ok) return null;
 
-  if (payload?.product) return payload.product;
-
-  const directProducts = Array.isArray(payload?.products)
-    ? payload.products
-    : [];
-  const directMatch = directProducts.find((product) => product.slug === slug);
-  if (directMatch) return directMatch;
-
-  const listResponse = await forwardLmsSlsRequest({
-    method: "GET",
-    path: "/api/products",
-  });
-  if (!listResponse.ok) return null;
-
-  const listPayload = (await listResponse.json().catch(() => null)) as {
-    product?: ProductPayload;
-    products?: ProductPayload[];
+  const payload = (await response.json().catch(() => null)) as {
+    product?: ProductPayload | null;
   } | null;
 
-  if (listPayload?.product?.slug === slug) return listPayload.product;
-
-  const products = Array.isArray(listPayload?.products)
-    ? listPayload.products
-    : [];
-  return products.find((product) => product.slug === slug) ?? null;
+  return payload?.product ?? null;
 }
 
 function formatPrice(minor: number, currency: "UAH" | "USD") {

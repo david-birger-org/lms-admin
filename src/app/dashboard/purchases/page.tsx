@@ -3,12 +3,15 @@ import {
   CabinetSection,
 } from "@/components/cabinet/cabinet-page-shell";
 import { UserPurchases } from "@/components/cabinet/UserPurchases";
+import { listUserPurchases } from "@/lib/server/user-purchases";
 
-export default function DashboardPurchasesPage() {
+export default async function DashboardPurchasesPage() {
+  const purchases = await listUserPurchases();
+
   return (
     <CabinetPage route="/dashboard/purchases">
       <CabinetSection>
-        <UserPurchases />
+        <UserPurchases initialPurchases={purchases} />
       </CabinetSection>
     </CabinetPage>
   );
