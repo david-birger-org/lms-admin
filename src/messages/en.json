@@ -339,9 +339,13 @@
       },
       "purchases": {
         "title": "User purchases",
+        "titleAdmin": "Invoices created by admin",
         "open": "Open purchases for {email}",
+        "openAdmin": "Open created invoices for {email}",
         "loading": "Loading purchases...",
+        "loadingAdmin": "Loading created invoices...",
         "empty": "No purchases found for this user.",
+        "emptyAdmin": "This admin has not created any invoices.",
         "errors": {
           "load": "Failed to load user purchases."
         },

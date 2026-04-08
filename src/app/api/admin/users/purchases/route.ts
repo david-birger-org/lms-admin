@@ -45,6 +45,7 @@ export async function GET(request: Request) {
       ),
       method: "GET",
       path: "/api/user/purchases",
+      search: user.role === "admin" ? "?scope=created" : undefined,
     });
   } catch (error) {
     const message = error instanceof Error ? error.message : "Unexpected error";

@@ -69,10 +69,12 @@ function formatDate(value: string, locale: string) {
 
 export function UserPurchasesDialog({
   email,
+  isAdmin = false,
   name,
   userId,
 }: {
   email: string;
+  isAdmin?: boolean;
   name: string | null;
   userId: string;
 }) {
@@ -133,14 +135,14 @@ export function UserPurchasesDialog({
         <Button
           variant="ghost"
           size="icon-sm"
-          aria-label={t("open", { email })}
+          aria-label={t(isAdmin ? "openAdmin" : "open", { email })}
         >
           <CreditCard className="size-3.5" />
         </Button>
       </DialogTrigger>
       <DialogContent className="max-w-[calc(100vw-2rem)] sm:max-w-4xl">
         <DialogHeader>
-          <DialogTitle>{t("title")}</DialogTitle>
+          <DialogTitle>{t(isAdmin ? "titleAdmin" : "title")}</DialogTitle>
           <DialogDescription>
             {name?.trim() ? `${name} · ${email}` : email}
           </DialogDescription>
@@ -155,11 +157,11 @@ export function UserPurchasesDialog({
         {isLoading ? (
           <div className="flex min-h-40 items-center justify-center text-sm text-muted-foreground">
             <Loader2 className="mr-2 size-4 animate-spin" />
-            {t("loading")}
+            {t(isAdmin ? "loadingAdmin" : "loading")}
           </div>
         ) : purchases.length === 0 ? (
           <div className="flex min-h-40 items-center justify-center rounded-lg border border-dashed text-sm text-muted-foreground">
-            {t("empty")}
+            {t(isAdmin ? "emptyAdmin" : "empty")}
           </div>
         ) : (
           <div className="overflow-x-auto rounded-lg border">

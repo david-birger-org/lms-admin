@@ -182,6 +182,7 @@ export function UsersManager({
                           userId={user.id}
                           email={user.email}
                           name={user.name}
+                          isAdmin={user.role === "admin"}
                         />
                       </div>
                     </TableCell>
