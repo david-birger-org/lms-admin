@@ -301,7 +301,7 @@
         "priceUah": "Ціна (UAH)",
         "priceUsd": "Ціна (USD)",
         "sortOrder": "Порядок",
-        "imageUrl": "URL зображення",
+        "imageUrl": "URL або шлях зображення",
         "optional": "(необов'язково)",
         "active": "Активний",
         "activeHint": "Приховані продукти не показуються на сайті.",

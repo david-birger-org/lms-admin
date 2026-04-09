@@ -146,21 +146,6 @@ export function ProductForm({
         </div>
       </div>
 
-      <div className="space-y-2">
-        <Label htmlFor="slug">{t("slug")}</Label>
-        <Input
-          className="h-9"
-          id="slug"
-          value={slug}
-          onChange={(e) => {
-            setSlug(e.target.value);
-            setAutoSlug(false);
-          }}
-          placeholder="online-coaching"
-          required
-        />
-      </div>
-
       <div className="grid gap-4 sm:grid-cols-2">
         <div className="space-y-2">
           <Label htmlFor="descriptionEn">{t("descriptionEn")}</Label>
@@ -215,6 +200,20 @@ export function ProductForm({
             onChange={(e) => setSortOrder(e.target.value)}
           />
         </div>
+        <div className="space-y-2">
+          <Label htmlFor="slug">{t("slug")}</Label>
+          <Input
+            className="h-9"
+            id="slug"
+            value={slug}
+            onChange={(e) => {
+              setSlug(e.target.value);
+              setAutoSlug(false);
+            }}
+            placeholder="online-coaching"
+            required
+          />
+        </div>
       </div>
 
       {pricingType === "fixed" ? (
@@ -262,10 +261,9 @@ export function ProductForm({
         <Input
           className="h-9"
           id="imageUrl"
-          type="url"
           value={imageUrl}
           onChange={(e) => setImageUrl(e.target.value)}
-          placeholder="https://..."
+          placeholder="/images/{locale}/coworking-1.jpg"
         />
       </div>
 

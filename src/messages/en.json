@@ -301,7 +301,7 @@
         "priceUah": "Price (UAH)",
         "priceUsd": "Price (USD)",
         "sortOrder": "Sort order",
-        "imageUrl": "Image URL",
+        "imageUrl": "Image URL or path",
         "optional": "(optional)",
         "active": "Active",
         "activeHint": "Hidden products won't appear on the portfolio site.",
