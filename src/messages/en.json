@@ -102,6 +102,10 @@
           "title": "Purchases",
           "description": "View your purchased products and payment history."
         },
+        "lectures": {
+          "title": "Lectures",
+          "description": "Access your purchased lecture materials."
+        },
         "settings": {
           "title": "Settings",
           "description": "Manage your account profile and session security."
@@ -343,6 +347,11 @@
           "name": "Optional",
           "email": "name@example.com"
         }
+      },
+      "features": {
+        "title": "Features",
+        "loading": "Loading features...",
+        "lectures": "Lectures access"
       },
       "purchases": {
         "title": "User purchases",
@@ -606,5 +615,11 @@
         "dailyPaidVolume": "Daily paid volume"
       }
     }
+  },
+  "lectures": {
+    "title": "Lectures",
+    "empty": "No lectures available yet.",
+    "noAccess": "You don't have access to lectures. Purchase a lecture package to get started.",
+    "backToList": "Back to lectures"
   }
 }

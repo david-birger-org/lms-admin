@@ -1,9 +1,9 @@
 import type { LucideIcon } from "lucide-react";
-import { LayoutDashboard, Settings, ShoppingBag } from "lucide-react";
+import { BookOpen, LayoutDashboard, Settings, ShoppingBag } from "lucide-react";
 
 export interface CabinetRoute {
   href: string;
-  key: "overview" | "purchases" | "settings";
+  key: "overview" | "purchases" | "lectures" | "settings";
   icon: LucideIcon;
 }
 
@@ -17,6 +17,11 @@ export const cabinetRoutes = [
     href: "/dashboard/purchases",
     key: "purchases",
     icon: ShoppingBag,
+  },
+  {
+    href: "/dashboard/lectures",
+    key: "lectures",
+    icon: BookOpen,
   },
   {
     href: "/dashboard/settings",
