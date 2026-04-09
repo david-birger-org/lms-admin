@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { toast } from "sonner";
 
+import { UserFeaturesManager } from "@/components/admin/UserFeaturesManager";
 import { UserPurchasesDialog } from "@/components/admin/UserPurchasesDialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -243,6 +244,11 @@ export function UsersManager({
                 </SelectContent>
               </Select>
             </div>
+            {editingUser && (
+              <div className="border-t pt-4">
+                <UserFeaturesManager authUserId={editingUser.id} />
+              </div>
+            )}
           </div>
 
           <DialogFooter>
