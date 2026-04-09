@@ -376,6 +376,196 @@
         }
       }
     },
+    "pendingInvoices": {
+      "title": "Pending invoices",
+      "description": "Invoices awaiting payment from the Monobank statement. Cancel invoices that are no longer needed.",
+      "refresh": "Refresh",
+      "loading": "Loading statement...",
+      "empty": "No pending invoices.",
+      "columns": {
+        "invoiceId": "Invoice ID",
+        "description": "Description",
+        "amount": "Amount",
+        "status": "Status",
+        "date": "Date"
+      },
+      "cancel": "Cancel",
+      "cancelFailed": "Cancel failed",
+      "cancelError": "Failed to cancel invoice"
+    },
+    "invoiceForm": {
+      "title": "Generate payment link",
+      "description": "Create a Monobank invoice and copy the checkout link immediately.",
+      "customerName": "Customer name",
+      "customerNamePlaceholder": "John Doe",
+      "descriptionLabel": "Description",
+      "descriptionPlaceholder": "Payment for coaching package",
+      "redirectUrl": "Redirect URL",
+      "optional": "(optional)",
+      "amount": "Amount",
+      "currency": "Currency",
+      "selectCurrency": "Select currency",
+      "expiresIn": "Expires in",
+      "presets": {
+        "15min": "15 min",
+        "1hour": "1 hour",
+        "24hours": "24 hours"
+      },
+      "useCustomDuration": "Use custom duration",
+      "useCustomDurationHint": "Override the presets with a custom minute value.",
+      "customDurationLabel": "Custom duration (minutes)",
+      "expiresAt": "Expires at",
+      "enterAtLeast1Minute": "Enter at least 1 minute.",
+      "defaultLifetime": "Default Monobank lifetime is 24 hours ({minutes} minutes).",
+      "generating": "Generating...",
+      "generateInvoice": "Generate invoice",
+      "copyLink": "Copy link",
+      "copied": "Copied",
+      "generatedInvoice": "Generated invoice",
+      "expires": "Expires:",
+      "expirationError": "Expiration time must be at least 1 minute.",
+      "requestFailed": "Request failed",
+      "unexpectedError": "Unexpected error"
+    },
+    "paymentsTable": {
+      "title": "Payments history",
+      "description": "Search the statement feed, filter rows, and inspect invoice-level payment details.",
+      "columns": {
+        "selectAll": "Select all",
+        "selectRow": "Select row",
+        "status": "Status",
+        "date": "Date",
+        "description": "Description",
+        "card": "Card",
+        "reference": "Reference",
+        "amount": "Amount",
+        "amountHint": "Amount the customer was originally charged on the invoice, before any conversion or fees.",
+        "profit": "Profit",
+        "profitHint": "Net amount you actually receive after Monobank's processing fee is deducted.",
+        "invoiceId": "Invoice ID",
+        "details": "Details",
+        "openDetails": "Open details for {id}"
+      },
+      "toolbar": {
+        "searchPlaceholder": "Search any payment field...",
+        "actions": "Actions",
+        "selected": "{count} selected",
+        "exportCsv": "Export selected CSV",
+        "copyRawData": "Copy selected raw data",
+        "copyIds": "Copy selected IDs",
+        "clearSelection": "Clear selection",
+        "status": "Status",
+        "filterStatus": "Filter status",
+        "columns": "Columns",
+        "columnLabels": {
+          "profitAmount": "profit",
+          "maskedPan": "card",
+          "invoiceId": "invoice id"
+        },
+        "rows": "Rows",
+        "refresh": "Refresh",
+        "reset": "Reset"
+      },
+      "toasts": {
+        "copyIdsFailed": "Failed to copy selected IDs.",
+        "copyIdsSuccess": "Selected IDs copied.",
+        "copyRawFailed": "Failed to copy selected raw data.",
+        "copyRawSuccess": "Selected raw data copied.",
+        "exportSuccess": "Selected rows exported as CSV."
+      },
+      "stats": {
+        "total": "Total:",
+        "settled": "Settled:"
+      },
+      "pagination": {
+        "rowsSelected": "{visible} of {filtered} row(s) selected.",
+        "rowsSelectedTotal": "{visible} of {filtered} visible row(s) selected ({total} total).",
+        "previous": "Previous",
+        "next": "Next"
+      },
+      "empty": {
+        "loading": "Loading results...",
+        "noVisibleResults": "No visible results. Reset filters or clear the search to see every row.",
+        "noResults": "No results.",
+        "resetTable": "Reset table"
+      }
+    },
+    "paymentDetails": {
+      "title": "Payment details",
+      "loadingProvider": "Fetching latest payment details from Monobank...",
+      "loadingDatabase": "Loading latest payment details...",
+      "cancelInvoice": "Cancel invoice",
+      "cancelling": "Cancelling...",
+      "openPaymentDetails": "Open payment details",
+      "loadingDetails": "Loading payment details...",
+      "openPayment": "Open a payment to view its details.",
+      "invoice": "Invoice {id}",
+      "summary": {
+        "title": "Payment summary",
+        "amount": "Amount",
+        "profitAmount": "Profit amount",
+        "description": "Description",
+        "openCheckoutLink": "Open checkout link"
+      },
+      "quickFacts": {
+        "title": "Quick facts",
+        "amount": "Amount",
+        "profitAmount": "Profit amount",
+        "card": "Card"
+      },
+      "hints": {
+        "amount": "Amount the customer was originally charged on the invoice, before any conversion or fees.",
+        "profitAmount": "Net amount you actually receive after Monobank's currency conversion and processing fee. Matches Monobank's profitAmount on statements.",
+        "fee": "Monobank's processing fee. Already deducted from Profit amount.",
+        "country": "Card-issuing country (ISO 3166)."
+      },
+      "statuses": {
+        "pending": "Pending",
+        "cancelled": "Cancelled",
+        "expired": "Expired",
+        "failed": "Failed",
+        "failure": "Failure",
+        "paid": "Paid",
+        "success": "Success",
+        "unknown": "Unknown"
+      },
+      "labels": {
+        "created": "Created",
+        "statementDate": "Statement date",
+        "updated": "Updated",
+        "bank": "Bank",
+        "paymentSystem": "Payment system",
+        "approvalCode": "Approval code",
+        "rrn": "RRN",
+        "terminal": "Terminal",
+        "transactionId": "Transaction ID",
+        "fee": "Fee",
+        "country": "Country",
+        "customer": "Customer",
+        "expires": "Expires",
+        "reference": "Reference"
+      },
+      "failureReason": "Failure reason",
+      "errorCode": "Error code"
+    },
+    "dateRangePicker": {
+      "reset": "Reset",
+      "maxDays": "Max {days} days per request.",
+      "daysSelected": "{days} day(s) selected",
+      "selectDates": "Select a start and end date.",
+      "apply": "Apply"
+    },
+    "paymentsHistory": {
+      "titles": {
+        "database": "Payment history",
+        "provider": "Provider statement"
+      },
+      "descriptions": {
+        "database": "Canonical app payment history from the payments table. Use the statement audit page to reconcile against the live Monobank feed.",
+        "provider": "Inspect the live Monobank statement feed for provider-side reconciliation."
+      },
+      "lastSynced": "Last synced {time}."
+    },
     "paymentsChart": {
       "title": "Payment trends",
       "badge": "Payments table",

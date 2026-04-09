@@ -3,6 +3,7 @@
 
 import type { Table } from "@tanstack/react-table";
 import { CheckCheck, ChevronDown, RefreshCw, X } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 import {
   downloadTextFile,
@@ -31,22 +32,6 @@ import { copyToClipboard } from "@/lib/clipboard";
 import type { StatementItem } from "@/lib/monobank";
 
 const pageSizeOptions = [10, 20, 50, 100] as const;
-
-function getColumnLabel(columnId: string) {
-  if (columnId === "profitAmount") {
-    return "profit";
-  }
-
-  if (columnId === "maskedPan") {
-    return "card";
-  }
-
-  if (columnId === "invoiceId") {
-    return "invoice id";
-  }
-
-  return columnId;
-}
 
 export function MonobankPaymentsTableToolbar({
   table,
@@ -79,6 +64,8 @@ export function MonobankPaymentsTableToolbar({
   onReset: () => void;
   onClearSelection: () => void;
 }) {
+  const t = useTranslations("admin.paymentsTable.toolbar");
+  const tt = useTranslations("admin.paymentsTable.toasts");
   const selectedRowCount = table.getSelectedRowModel().rows.length;
   const normalizedExportFilePrefix =
     exportFilePrefix
@@ -87,15 +74,20 @@ export function MonobankPaymentsTableToolbar({
       .replaceAll(/[^a-z0-9]+/g, "-")
       .replaceAll(/(^-|-$)/g, "") || "payments";
 
+  function getColumnLabel(columnId: string) {
+    const labels = { profitAmount: "profit", maskedPan: "card", invoiceId: "invoice id" } as Record<string, string>;
+    return labels[columnId] ?? columnId;
+  }
+
   async function handleCopySelectedIds() {
     const copied = await copyToClipboard(selectedPaymentIdentifiers.join("\n"));
 
     if (!copied) {
-      toast.error("Failed to copy selected IDs.");
+      toast.error(tt("copyIdsFailed"));
       return;
     }
 
-    toast.success("Selected IDs copied.");
+    toast.success(tt("copyIdsSuccess"));
   }
 
   async function handleCopySelectedRawData() {
@@ -104,11 +96,11 @@ export function MonobankPaymentsTableToolbar({
     );
 
     if (!copied) {
-      toast.error("Failed to copy selected raw data.");
+      toast.error(tt("copyRawFailed"));
       return;
     }
 
-    toast.success("Selected raw data copied.");
+    toast.success(tt("copyRawSuccess"));
   }
 
   function handleExportSelectedCsv() {
@@ -119,13 +111,13 @@ export function MonobankPaymentsTableToolbar({
       fileName: `${normalizedExportFilePrefix}-selected-${timestamp}.csv`,
       mimeType: "text/csv;charset=utf-8",
     });
-    toast.success("Selected rows exported as CSV.");
+    toast.success(tt("exportSuccess"));
   }
 
   return (
     <div className="flex flex-col gap-2 py-3 md:flex-row md:items-center">
       <Input
-        placeholder="Search any payment field..."
+        placeholder={t("searchPlaceholder")}
         value={searchValue}
         onChange={(event) => onSearchChange(event.target.value)}
         className="h-9 md:max-w-sm"
@@ -137,35 +129,35 @@ export function MonobankPaymentsTableToolbar({
             <DropdownMenuTrigger asChild>
               <Button variant="outline" size="sm" className="h-9 px-3">
                 <CheckCheck />
-                Actions
+                {t("actions")}
                 <ChevronDown />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-56">
               <DropdownMenuGroup>
                 <DropdownMenuLabel>
-                  {selectedRowCount} selected
+                  {t("selected", { count: selectedRowCount })}
                 </DropdownMenuLabel>
                 <DropdownMenuItem
                   disabled={selectedRows.length === 0}
                   onClick={() => handleExportSelectedCsv()}
                 >
-                  Export selected CSV
+                  {t("exportCsv")}
                 </DropdownMenuItem>
                 <DropdownMenuItem
                   disabled={selectedRows.length === 0}
                   onClick={() => void handleCopySelectedRawData()}
                 >
-                  Copy selected raw data
+                  {t("copyRawData")}
                 </DropdownMenuItem>
                 <DropdownMenuItem
                   disabled={selectedPaymentIdentifiers.length === 0}
                   onClick={() => void handleCopySelectedIds()}
                 >
-                  Copy selected IDs
+                  {t("copyIds")}
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={onClearSelection}>
-                  Clear selection
+                  {t("clearSelection")}
                 </DropdownMenuItem>
               </DropdownMenuGroup>
             </DropdownMenuContent>
@@ -175,13 +167,13 @@ export function MonobankPaymentsTableToolbar({
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="outline" size="sm" className="h-9 px-3">
-              Status
+              {t("status")}
               <ChevronDown />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             <DropdownMenuGroup>
-              <DropdownMenuLabel>Filter status</DropdownMenuLabel>
+              <DropdownMenuLabel>{t("filterStatus")}</DropdownMenuLabel>
               {statusOptions.map((status) => (
                 <DropdownMenuCheckboxItem
                   key={status}
@@ -201,7 +193,7 @@ export function MonobankPaymentsTableToolbar({
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="outline" size="sm" className="h-9 px-3">
-              Columns
+              {t("columns")}
               <ChevronDown />
             </Button>
           </DropdownMenuTrigger>
@@ -231,7 +223,7 @@ export function MonobankPaymentsTableToolbar({
           onValueChange={(value) => table.setPageSize(Number(value))}
         >
           <SelectTrigger className="h-9 w-20">
-            <SelectValue placeholder="Rows" />
+            <SelectValue placeholder={t("rows")} />
           </SelectTrigger>
           <SelectContent>
             {pageSizeOptions.map((pageSize) => (
@@ -250,7 +242,7 @@ export function MonobankPaymentsTableToolbar({
           disabled={isLoading}
         >
           <RefreshCw className={isLoading ? "animate-spin" : undefined} />
-          Refresh
+          {t("refresh")}
         </Button>
 
         {hasActiveState ? (
@@ -261,7 +253,7 @@ export function MonobankPaymentsTableToolbar({
             onClick={onReset}
           >
             <X />
-            Reset
+            {t("reset")}
           </Button>
         ) : null}
       </div>

@@ -15,8 +15,10 @@ import {
 } from "@tanstack/react-table";
 import * as React from "react";
 
+import { useTranslations } from "next-intl";
+
 import { MonobankPaymentDetailsPopover } from "@/components/admin/MonobankPaymentDetailsPopover";
-import { monobankPaymentsColumns } from "@/components/admin/payments-table/columns";
+import { createMonobankPaymentsColumns } from "@/components/admin/payments-table/columns";
 import { MonobankPaymentsTablePagination } from "@/components/admin/payments-table/pagination";
 import { MonobankPaymentsTableStats } from "@/components/admin/payments-table/stats";
 import { MonobankPaymentsTableContent } from "@/components/admin/payments-table/table-content";
@@ -138,6 +140,8 @@ export function MonobankPaymentsDataTable({
   description?: string;
   detailsSource?: PaymentDetailsSource;
 }) {
+  const t = useTranslations("admin.paymentsTable");
+  const columns = React.useMemo(() => createMonobankPaymentsColumns((key, params) => t(`columns.${key}`, params)), [t]);
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     [],
@@ -168,7 +172,7 @@ export function MonobankPaymentsDataTable({
 
   const table = useReactTable({
     data,
-    columns: monobankPaymentsColumns,
+    columns,
     enableRowSelection: true,
     getRowId: getPaymentRowId,
     globalFilterFn: paymentSearchFilter,
@@ -287,19 +291,17 @@ export function MonobankPaymentsDataTable({
   }, [table]);
 
   const resolvedEmptyMessage = React.useMemo(() => {
-    if (isLoading && data.length === 0) {
-      return "Loading results...";
-    }
+    if (isLoading && data.length === 0)
+      return t("empty.loading");
 
-    if (hasActiveState && filteredRowCount === 0) {
-      return "No visible results. Reset filters or clear the search to see every row.";
-    }
+    if (hasActiveState && filteredRowCount === 0)
+      return t("empty.noVisibleResults");
 
-    return emptyMessage ?? "No results.";
-  }, [data.length, emptyMessage, filteredRowCount, hasActiveState, isLoading]);
+    return emptyMessage ?? t("empty.noResults");
+  }, [data.length, emptyMessage, filteredRowCount, hasActiveState, isLoading, t]);
 
   const emptyActionLabel =
-    hasActiveState && filteredRowCount === 0 ? "Reset table" : undefined;
+    hasActiveState && filteredRowCount === 0 ? t("empty.resetTable") : undefined;
 
   return (
     <Card className="shadow-xs">

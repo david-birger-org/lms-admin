@@ -9,6 +9,7 @@ import {
   ReceiptText,
   XCircle,
 } from "lucide-react";
+import { useTranslations } from "next-intl";
 import type { PaymentDetails } from "@/components/admin/payment-details/types";
 import {
   mergePaymentDetails,
@@ -27,15 +28,6 @@ import {
   type StatementItem,
 } from "@/lib/monobank";
 import { cn } from "@/lib/utils";
-
-const HINTS = {
-  amount:
-    "Amount the customer was originally charged on the invoice, before any conversion or fees.",
-  profitAmount:
-    "Net amount you actually receive after Monobank's currency conversion and processing fee. Matches Monobank's profitAmount on statements.",
-  fee: "Monobank's processing fee. Already deducted from Profit amount.",
-  country: "Card-issuing country (ISO 3166).",
-} as const;
 
 function HintIcon({ text }: { text: string }) {
   return (
@@ -56,53 +48,6 @@ function HintIcon({ text }: { text: string }) {
     </Tooltip>
   );
 }
-
-const pendingStatusAppearance = {
-  className:
-    "border-sky-200 bg-sky-50 text-sky-700 dark:border-sky-900/60 dark:bg-sky-500/10 dark:text-sky-300",
-  icon: AlertTriangle,
-  label: "Pending",
-} as const;
-
-const paymentStatusAppearances = {
-  cancelled: {
-    className:
-      "border-border bg-muted/40 text-muted-foreground dark:bg-muted/20",
-    icon: XCircle,
-    label: "Cancelled",
-  },
-  expired: {
-    className:
-      "border-amber-200 bg-amber-50 text-amber-700 dark:border-amber-900/60 dark:bg-amber-500/10 dark:text-amber-300",
-    icon: XCircle,
-    label: "Expired",
-  },
-  failed: {
-    className:
-      "border-rose-200 bg-rose-50 text-rose-700 dark:border-rose-900/60 dark:bg-rose-500/10 dark:text-rose-300",
-    icon: XCircle,
-    label: "Failed",
-  },
-  failure: {
-    className:
-      "border-rose-200 bg-rose-50 text-rose-700 dark:border-rose-900/60 dark:bg-rose-500/10 dark:text-rose-300",
-    icon: XCircle,
-    label: "Failure",
-  },
-  invoice_created: pendingStatusAppearance,
-  paid: {
-    className:
-      "border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-900/60 dark:bg-emerald-500/10 dark:text-emerald-300",
-    icon: CheckCircle2,
-    label: "Paid",
-  },
-  success: {
-    className:
-      "border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-900/60 dark:bg-emerald-500/10 dark:text-emerald-300",
-    icon: CheckCircle2,
-    label: "Success",
-  },
-} as const;
 
 function stringifyDetailValue(value?: number | string) {
   return value === undefined || value === null ? "-" : String(value);
@@ -137,60 +82,32 @@ function DetailCard({
   );
 }
 
-function getStatusAppearance(status?: string) {
-  const normalizedStatus = normalizePaymentStatus(status);
-
-  if (normalizedStatus === "processing" || normalizedStatus === "hold") {
-    return {
-      label: status ?? "Pending",
-      icon: AlertTriangle,
-      className:
-        "border-amber-200 bg-amber-50 text-amber-700 dark:border-amber-900/60 dark:bg-amber-500/10 dark:text-amber-300",
-    };
-  }
-
-  if (normalizedStatus === "created") {
-    return pendingStatusAppearance;
-  }
-
-  if (normalizedStatus && normalizedStatus in paymentStatusAppearances) {
-    return paymentStatusAppearances[
-      normalizedStatus as keyof typeof paymentStatusAppearances
-    ];
-  }
-
-  return {
-    label: status ?? "Unknown",
-    icon: ReceiptText,
-    className:
-      "border-border bg-muted/40 text-muted-foreground dark:bg-muted/20",
-  };
-}
-
 function PaymentSummarySection({
   amount,
   ccy,
   destination,
   profitAmount,
   pageUrl,
+  t,
 }: {
   amount?: number;
   ccy?: PaymentDetails["ccy"];
   destination?: string;
   profitAmount?: number;
   pageUrl?: string;
+  t: (key: string) => string;
 }) {
   return (
     <div className="space-y-4 sm:space-y-5">
       <div className="space-y-2">
         <p className="text-muted-foreground text-[11px] font-medium uppercase tracking-[0.22em]">
-          Payment summary
+          {t("summary.title")}
         </p>
         <div className="flex flex-wrap items-end gap-x-6 gap-y-3">
           <div>
             <p className="text-muted-foreground inline-flex items-center gap-1.5 text-xs">
-              Amount
-              <HintIcon text={HINTS.amount} />
+              {t("summary.amount")}
+              <HintIcon text={t("hints.amount")} />
             </p>
             <p className="text-2xl font-semibold tracking-tight sm:text-3xl">
               {formatMonobankMoney(amount, ccy)}
@@ -199,8 +116,8 @@ function PaymentSummarySection({
           {typeof profitAmount === "number" ? (
             <div>
               <p className="text-muted-foreground inline-flex items-center gap-1.5 text-xs">
-                Profit amount
-                <HintIcon text={HINTS.profitAmount} />
+                {t("summary.profitAmount")}
+                <HintIcon text={t("hints.profitAmount")} />
               </p>
               <p className="text-base font-medium sm:text-lg">
                 {formatMonobankMoney(profitAmount, ccy)}
@@ -213,7 +130,7 @@ function PaymentSummarySection({
       <div className="rounded-xl border border-border/60 bg-muted/20 p-4 sm:p-5">
         <div className="mb-3 flex items-center gap-2">
           <ReceiptText className="text-muted-foreground size-4" />
-          <p className="text-sm font-medium">Description</p>
+          <p className="text-sm font-medium">{t("summary.description")}</p>
         </div>
         <p className="text-sm leading-6 sm:text-[15px]">{destination ?? "-"}</p>
         {pageUrl ? (
@@ -223,7 +140,7 @@ function PaymentSummarySection({
             rel="noreferrer"
             className="text-primary mt-3 inline-flex items-center gap-1 text-sm underline underline-offset-4"
           >
-            Open checkout link
+            {t("summary.openCheckoutLink")}
             <ExternalLink className="size-3.5" />
           </a>
         ) : null}
@@ -237,33 +154,35 @@ function QuickFactsSection({
   profitAmount,
   amount,
   ccy,
+  t,
 }: {
   card?: string;
   profitAmount?: number;
   amount?: number;
   ccy?: PaymentDetails["ccy"];
+  t: (key: string) => string;
 }) {
   const facts: { label: string; value: string; hint?: string }[] = [
     {
-      label: "Amount",
+      label: t("quickFacts.amount"),
       value: formatMonobankMoney(amount, ccy),
-      hint: HINTS.amount,
+      hint: t("hints.amount"),
     },
     typeof profitAmount === "number"
       ? {
-          label: "Profit amount",
+          label: t("quickFacts.profitAmount"),
           value: formatMonobankMoney(profitAmount, ccy),
-          hint: HINTS.profitAmount,
+          hint: t("hints.profitAmount"),
         }
       : null,
-    { label: "Card", value: card ?? "-" },
+    { label: t("quickFacts.card"), value: card ?? "-" },
   ].filter((item) => item !== null);
 
   return (
     <div className="rounded-xl border border-border/60 bg-background/80 p-4 shadow-xs">
       <div className="mb-3 flex items-center gap-2">
         <CreditCard className="text-muted-foreground size-4" />
-        <p className="text-sm font-medium">Quick facts</p>
+        <p className="text-sm font-medium">{t("quickFacts.title")}</p>
       </div>
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-1">
         {facts.map((item) => (
@@ -292,10 +211,85 @@ export function PaymentDetailsBody({
   details: PaymentDetails | null;
   summary?: StatementItem;
 }) {
+  const t = useTranslations("admin.paymentDetails");
   const displayDetails = mergePaymentDetails(summary, details);
   const paymentInfo = displayDetails?.paymentInfo;
+
+  const pendingStatusAppearance = {
+    className:
+      "border-sky-200 bg-sky-50 text-sky-700 dark:border-sky-900/60 dark:bg-sky-500/10 dark:text-sky-300",
+    icon: AlertTriangle,
+    label: t("statuses.pending"),
+  };
+
+  const paymentStatusAppearances: Record<string, { className: string; icon: typeof AlertTriangle; label: string }> = {
+    cancelled: {
+      className:
+        "border-border bg-muted/40 text-muted-foreground dark:bg-muted/20",
+      icon: XCircle,
+      label: t("statuses.cancelled"),
+    },
+    expired: {
+      className:
+        "border-amber-200 bg-amber-50 text-amber-700 dark:border-amber-900/60 dark:bg-amber-500/10 dark:text-amber-300",
+      icon: XCircle,
+      label: t("statuses.expired"),
+    },
+    failed: {
+      className:
+        "border-rose-200 bg-rose-50 text-rose-700 dark:border-rose-900/60 dark:bg-rose-500/10 dark:text-rose-300",
+      icon: XCircle,
+      label: t("statuses.failed"),
+    },
+    failure: {
+      className:
+        "border-rose-200 bg-rose-50 text-rose-700 dark:border-rose-900/60 dark:bg-rose-500/10 dark:text-rose-300",
+      icon: XCircle,
+      label: t("statuses.failure"),
+    },
+    invoice_created: pendingStatusAppearance,
+    paid: {
+      className:
+        "border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-900/60 dark:bg-emerald-500/10 dark:text-emerald-300",
+      icon: CheckCircle2,
+      label: t("statuses.paid"),
+    },
+    success: {
+      className:
+        "border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-900/60 dark:bg-emerald-500/10 dark:text-emerald-300",
+      icon: CheckCircle2,
+      label: t("statuses.success"),
+    },
+  };
+
+  function getStatusAppearance(status?: string) {
+    const normalizedStatus = normalizePaymentStatus(status);
+
+    if (normalizedStatus === "processing" || normalizedStatus === "hold") {
+      return {
+        label: status ?? t("statuses.pending"),
+        icon: AlertTriangle,
+        className:
+          "border-amber-200 bg-amber-50 text-amber-700 dark:border-amber-900/60 dark:bg-amber-500/10 dark:text-amber-300",
+      };
+    }
+
+    if (normalizedStatus === "created")
+      return pendingStatusAppearance;
+
+    if (normalizedStatus && normalizedStatus in paymentStatusAppearances)
+      return paymentStatusAppearances[normalizedStatus];
+
+    return {
+      label: status ?? t("statuses.unknown"),
+      icon: ReceiptText,
+      className:
+        "border-border bg-muted/40 text-muted-foreground dark:bg-muted/20",
+    };
+  }
+
   const statusAppearance = getStatusAppearance(displayDetails?.status);
-  const StatusIcon = statusAppearance.icon;
+  const StatusIcon = statusAppearance!.icon;
   const secondaryDetails: {
     label: string
     value: string
@@ -303,61 +297,61 @@ export function PaymentDetailsBody({
     hint?: string
   }[] = [
     {
-      label: details?.createdDate ? "Created" : "Statement date",
+      label: details?.createdDate ? t("labels.created") : t("labels.statementDate"),
       value: formatMonobankDate(displayDetails?.createdDate),
     },
     details?.modifiedDate
       ? {
-          label: "Updated",
+          label: t("labels.updated"),
           value: formatMonobankDate(details.modifiedDate),
         }
       : null,
-    paymentInfo?.bank ? { label: "Bank", value: paymentInfo.bank } : null,
+    paymentInfo?.bank ? { label: t("labels.bank"), value: paymentInfo.bank } : null,
     paymentInfo?.paymentSystem
-      ? { label: "Payment system", value: paymentInfo.paymentSystem }
+      ? { label: t("labels.paymentSystem"), value: paymentInfo.paymentSystem }
       : null,
     paymentInfo?.approvalCode
-      ? { label: "Approval code", value: paymentInfo.approvalCode }
+      ? { label: t("labels.approvalCode"), value: paymentInfo.approvalCode }
       : null,
-    paymentInfo?.rrn ? { label: "RRN", value: paymentInfo.rrn } : null,
+    paymentInfo?.rrn ? { label: t("labels.rrn"), value: paymentInfo.rrn } : null,
     paymentInfo?.terminal
-      ? { label: "Terminal", value: paymentInfo.terminal }
+      ? { label: t("labels.terminal"), value: paymentInfo.terminal }
       : null,
     paymentInfo?.tranId
-      ? { label: "Transaction ID", value: paymentInfo.tranId, mono: true }
+      ? { label: t("labels.transactionId"), value: paymentInfo.tranId, mono: true }
       : null,
     typeof paymentInfo?.fee === "number"
       ? {
-          label: "Fee",
+          label: t("labels.fee"),
           value: formatMonobankMoney(paymentInfo.fee, displayDetails?.ccy),
-          hint: HINTS.fee,
+          hint: t("hints.fee"),
         }
       : null,
     paymentInfo?.country
       ? {
-          label: "Country",
+          label: t("labels.country"),
           value: formatCountryCode(paymentInfo.country),
-          hint: HINTS.country,
+          hint: t("hints.country"),
         }
       : null,
     displayDetails?.customerName
-      ? { label: "Customer", value: displayDetails.customerName }
+      ? { label: t("labels.customer"), value: displayDetails.customerName }
       : null,
     displayDetails?.expiresAt
       ? {
-          label: "Expires",
+          label: t("labels.expires"),
           value: formatMonobankDate(displayDetails.expiresAt),
         }
       : null,
     displayDetails?.reference
-      ? { label: "Reference", value: displayDetails.reference, mono: true }
+      ? { label: t("labels.reference"), value: displayDetails.reference, mono: true }
       : null,
   ].filter((item) => item !== null);
 
   if (isLoading && !displayDetails) {
     return (
       <p className="text-muted-foreground text-sm">
-        Loading payment details...
+        {t("loadingDetails")}
       </p>
     );
   }
@@ -373,7 +367,7 @@ export function PaymentDetailsBody({
   if (!displayDetails) {
     return (
       <p className="text-muted-foreground text-sm">
-        Open a payment to view its details.
+        {t("openPayment")}
       </p>
     );
   }
@@ -394,17 +388,17 @@ export function PaymentDetailsBody({
                 variant="outline"
                 className={cn(
                   "h-7 gap-1.5 rounded-full px-3 text-xs capitalize",
-                  statusAppearance.className,
+                  statusAppearance!.className,
                 )}
               >
                 <StatusIcon className="size-3.5" />
-                {statusAppearance.label}
+                {statusAppearance!.label}
               </Badge>
               <Badge
                 variant="outline"
                 className="h-7 rounded-full px-3 text-xs"
               >
-                Invoice {displayDetails.invoiceId ?? "-"}
+                {t("invoice", { id: displayDetails.invoiceId ?? "-" })}
               </Badge>
             </div>
 
@@ -414,6 +408,7 @@ export function PaymentDetailsBody({
               destination={displayDetails.destination}
               profitAmount={displayDetails.profitAmount}
               pageUrl={displayDetails.pageUrl}
+              t={t}
             />
           </div>
 
@@ -423,6 +418,7 @@ export function PaymentDetailsBody({
               ccy={displayDetails.ccy}
               card={paymentInfo?.maskedPan}
               profitAmount={displayDetails.profitAmount}
+              t={t}
             />
           </div>
         </div>
@@ -443,11 +439,11 @@ export function PaymentDetailsBody({
       {(displayDetails.failureReason || displayDetails.errCode) && (
         <div className="grid gap-3 sm:grid-cols-2">
           <DetailCard
-            label="Failure reason"
+            label={t("failureReason")}
             value={stringifyDetailValue(displayDetails.failureReason)}
           />
           <DetailCard
-            label="Error code"
+            label={t("errorCode")}
             value={stringifyDetailValue(displayDetails.errCode)}
           />
         </div>

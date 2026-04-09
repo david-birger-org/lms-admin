@@ -2,6 +2,7 @@
 "use no memo";
 
 import type { Table } from "@tanstack/react-table";
+import { useTranslations } from "next-intl";
 
 import { Button } from "@/components/ui/button";
 import type { StatementItem } from "@/lib/monobank";
@@ -11,14 +12,15 @@ export function MonobankPaymentsTablePagination({
 }: {
   table: Table<StatementItem>;
 }) {
+  const t = useTranslations("admin.paymentsTable.pagination");
   const filteredRowCount = table.getFilteredRowModel().rows.length;
   const visibleSelectedRowCount =
     table.getFilteredSelectedRowModel().rows.length;
   const selectedRowCount = table.getSelectedRowModel().rows.length;
   const selectionLabel =
     visibleSelectedRowCount === selectedRowCount
-      ? `${selectedRowCount} of ${filteredRowCount} row(s) selected.`
-      : `${visibleSelectedRowCount} of ${filteredRowCount} visible row(s) selected (${selectedRowCount} total).`;
+      ? t("rowsSelected", { visible: selectedRowCount, filtered: filteredRowCount })
+      : t("rowsSelectedTotal", { visible: visibleSelectedRowCount, filtered: filteredRowCount, total: selectedRowCount });
 
   return (
     <div className="flex flex-col gap-2 py-3 sm:flex-row sm:items-center sm:justify-end">
@@ -33,7 +35,7 @@ export function MonobankPaymentsTablePagination({
           onClick={() => table.previousPage()}
           disabled={!table.getCanPreviousPage()}
         >
-          Previous
+          {t("previous")}
         </Button>
         <Button
           variant="outline"
@@ -42,7 +44,7 @@ export function MonobankPaymentsTablePagination({
           onClick={() => table.nextPage()}
           disabled={!table.getCanNextPage()}
         >
-          Next
+          {t("next")}
         </Button>
       </div>
     </div>

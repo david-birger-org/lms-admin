@@ -1,6 +1,7 @@
 "use client";
 
 import { CalendarIcon } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 import type { DateRange } from "react-day-picker";
 
@@ -70,6 +71,7 @@ export function DateRangePicker({
   disabled?: boolean;
   maxDays?: number;
 }) {
+  const t = useTranslations("admin.dateRangePicker");
   const [open, setOpen] = useState(false);
   const [draft, setDraft] = useState<DateRange | undefined>(
     rangeToDates(range),
@@ -151,7 +153,7 @@ export function DateRangePicker({
             className="h-8 px-2.5"
             onClick={() => handleShortcut(30)}
           >
-            Reset
+            {t("reset")}
           </Button>
         </div>
         <Calendar
@@ -164,17 +166,17 @@ export function DateRangePicker({
         <div className="flex items-center justify-between gap-2 border-t p-3">
           <p className="text-muted-foreground text-xs">
             {exceedsMax
-              ? `Max ${maxDays} days per request.`
+              ? t("maxDays", { days: maxDays })
               : draftRange
-                ? `${draftDays} day${draftDays === 1 ? "" : "s"} selected`
-                : "Select a start and end date."}
+                ? t("daysSelected", { days: draftDays })
+                : t("selectDates")}
           </p>
           <Button
             size="sm"
             onClick={handleApply}
             disabled={!draftRange || exceedsMax}
           >
-            Apply
+            {t("apply")}
           </Button>
         </div>
       </PopoverContent>

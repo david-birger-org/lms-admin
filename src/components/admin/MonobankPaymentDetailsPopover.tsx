@@ -1,6 +1,7 @@
 "use client";
 
 import { Eye, LoaderCircle } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 import { PaymentDetailsBody } from "@/components/admin/payment-details/PaymentDetailsBody";
 import { usePaymentDetails } from "@/components/admin/payment-details/usePaymentDetails";
@@ -54,10 +55,11 @@ export function MonobankPaymentDetailsPopover({
     onInvoiceChanged,
     hideTrigger,
   });
+  const t = useTranslations("admin.paymentDetails");
   const loadingLabel =
     detailsSource === "provider"
-      ? "Fetching latest payment details from Monobank..."
-      : "Loading latest payment details...";
+      ? t("loadingProvider")
+      : t("loadingDatabase");
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
@@ -67,7 +69,7 @@ export function MonobankPaymentDetailsPopover({
             type="button"
             variant="outline"
             size="icon"
-            aria-label="Open payment details"
+            aria-label={t("openPaymentDetails")}
             disabled={!effectiveInvoiceId}
           >
             <Eye />
@@ -77,7 +79,7 @@ export function MonobankPaymentDetailsPopover({
       <DialogContent className="max-w-[calc(100vw-2rem)] gap-0 p-0 sm:max-w-5xl xl:max-w-6xl">
         <DialogHeader className="border-b bg-muted/20 px-4 py-4 sm:px-6 sm:py-5">
           <DialogTitle className="text-base sm:text-lg">
-            Payment details
+            {t("title")}
           </DialogTitle>
           <DialogDescription className="break-all font-mono text-[11px] sm:text-xs">
             {effectiveInvoiceId ?? "-"}
@@ -104,10 +106,10 @@ export function MonobankPaymentDetailsPopover({
                   {isCancelling ? (
                     <>
                       <LoaderCircle className="animate-spin" />
-                      Cancelling...
+                      {t("cancelling")}
                     </>
                   ) : (
-                    "Cancel invoice"
+                    t("cancelInvoice")
                   )}
                 </Button>
               ) : null}

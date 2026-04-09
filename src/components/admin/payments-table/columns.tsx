@@ -55,7 +55,7 @@ function StatusIcon({ status }: { status?: string | null }) {
     return (
       <CircleCheckBig
         className="size-4 text-emerald-600"
-        aria-label={status ?? "Paid"}
+        aria-label={status ?? undefined}
       />
     );
   }
@@ -73,7 +73,7 @@ function StatusIcon({ status }: { status?: string | null }) {
     return (
       <CircleX
         className="size-4 text-rose-600"
-        aria-label={status ?? "Failed"}
+        aria-label={status ?? undefined}
       />
     );
   }
@@ -94,7 +94,7 @@ function StatusIcon({ status }: { status?: string | null }) {
     return (
       <CircleX
         className="size-4 text-muted-foreground"
-        aria-label="Cancelled"
+        aria-label={status ?? undefined}
       />
     );
   }
@@ -133,150 +133,173 @@ const statusFilterFn: FilterFn<StatementItem> = (
   return typeof status === "string" ? filterValue.includes(status) : false;
 };
 
-export const monobankPaymentsColumns: ColumnDef<StatementItem>[] = [
-  {
-    id: "select",
-    header: ({ table }) => (
-      <Checkbox
-        checked={table.getIsAllPageRowsSelected()}
-        indeterminate={
-          !table.getIsAllPageRowsSelected() && table.getIsSomePageRowsSelected()
-        }
-        onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-        onClick={(event) => event.stopPropagation()}
-        aria-label="Select all"
-      />
-    ),
-    cell: ({ row }) => (
-      <Checkbox
-        checked={row.getIsSelected()}
-        onCheckedChange={(value) => row.toggleSelected(!!value)}
-        onClick={(event) => event.stopPropagation()}
-        data-row-interactive="true"
-        aria-label="Select row"
-      />
-    ),
-    enableSorting: false,
-    enableHiding: false,
-  },
-  {
-    accessorKey: "status",
-    header: "Status",
-    filterFn: statusFilterFn,
-    cell: ({ row }) => (
-      <div className="flex justify-center" title={row.original.status ?? "-"}>
-        <StatusIcon status={row.original.status} />
-      </div>
-    ),
-  },
-  {
-    accessorKey: "date",
-    header: ({ column }) => (
-      <SortableColumnHeader column={column} title="Date" />
-    ),
-    cell: ({ row }) => {
-      const value = row.original.date;
-
-      if (!value) {
-        return <div>-</div>;
-      }
-
-      return (
-        <div className="text-xs sm:text-sm">
-          {formatMonobankShortDate(value)}
-        </div>
-      );
-    },
-  },
-  {
-    accessorKey: "destination",
-    header: ({ column }) => (
-      <SortableColumnHeader column={column} title="Description" />
-    ),
-    cell: ({ row }) => (
-      <div className="max-w-[8.5rem] truncate text-xs sm:max-w-72 sm:text-sm">
-        {row.original.destination ?? "-"}
-      </div>
-    ),
-  },
-  {
-    accessorKey: "maskedPan",
-    header: "Card",
-    cell: ({ row }) => (
-      <div className="text-xs sm:text-sm">{row.original.maskedPan ?? "-"}</div>
-    ),
-  },
-  {
-    accessorKey: "reference",
-    header: ({ column }) => (
-      <SortableColumnHeader column={column} title="Reference" />
-    ),
-    cell: ({ row }) => (
-      <div className="max-w-[7rem] truncate font-mono text-[11px] sm:max-w-none sm:text-xs">
-        {row.original.reference?.split("-").at(-1) ?? "-"}
-      </div>
-    ),
-  },
-  {
-    accessorKey: "amount",
-    header: () => (
-      <div className="flex items-center justify-end gap-1.5 text-right">
-        Amount
-        <ColumnHint text="Amount the customer was originally charged on the invoice, before any conversion or fees." />
-      </div>
-    ),
-    cell: ({ row }) => (
-      <div className="text-right text-xs font-medium sm:text-sm">
-        {formatMonobankMoney(row.original.amount, row.original.ccy)}
-      </div>
-    ),
-  },
-  {
-    accessorKey: "profitAmount",
-    header: () => (
-      <div className="flex items-center justify-end gap-1.5 text-right">
-        Profit
-        <ColumnHint text="Net amount you actually receive after Monobank's processing fee is deducted." />
-      </div>
-    ),
-    cell: ({ row }) => (
-      <div className="text-right text-xs font-medium sm:text-sm">
-        {formatMonobankMoney(row.original.profitAmount, row.original.ccy)}
-      </div>
-    ),
-  },
-  {
-    accessorKey: "invoiceId",
-    header: ({ column }) => (
-      <SortableColumnHeader column={column} title="Invoice ID" />
-    ),
-    cell: ({ row }) => (
-      <div className="max-w-[7rem] truncate font-mono text-[11px] sm:max-w-none sm:text-xs">
-        {row.original.invoiceId ?? "-"}
-      </div>
-    ),
-  },
-  {
-    id: "details",
-    header: () => <span className="sr-only">Details</span>,
-    cell: ({ row, table }) => (
-      <div className="flex justify-end">
-        <Button
-          type="button"
-          variant="ghost"
-          size="icon-xs"
+export function createMonobankPaymentsColumns(t: (key: string, params?: Record<string, string>) => string): ColumnDef<StatementItem>[] {
+  return [
+    {
+      id: "select",
+      header: ({ table }) => (
+        <Checkbox
+          checked={table.getIsAllPageRowsSelected()}
+          indeterminate={
+            !table.getIsAllPageRowsSelected() && table.getIsSomePageRowsSelected()
+          }
+          onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
+          onClick={(event) => event.stopPropagation()}
+          aria-label={t("selectAll")}
+        />
+      ),
+      cell: ({ row }) => (
+        <Checkbox
+          checked={row.getIsSelected()}
+          onCheckedChange={(value) => row.toggleSelected(!!value)}
+          onClick={(event) => event.stopPropagation()}
           data-row-interactive="true"
-          aria-label={`Open details for ${row.original.invoiceId ?? row.original.reference ?? "payment"}`}
-          onClick={(event) => {
-            event.stopPropagation();
-            table.options.meta?.onOpenPaymentDetails?.(row.original);
-          }}
-        >
-          <Eye />
-        </Button>
-      </div>
-    ),
-    enableSorting: false,
-    enableHiding: false,
-  },
-];
+          aria-label={t("selectRow")}
+        />
+      ),
+      enableSorting: false,
+      enableHiding: false,
+    },
+    {
+      accessorKey: "status",
+      header: t("status"),
+      filterFn: statusFilterFn,
+      cell: ({ row }) => (
+        <div className="flex justify-center" title={row.original.status ?? "-"}>
+          <StatusIcon status={row.original.status} />
+        </div>
+      ),
+    },
+    {
+      accessorKey: "date",
+      header: ({ column }) => (
+        <SortableColumnHeader column={column} title={t("date")} />
+      ),
+      cell: ({ row }) => {
+        const value = row.original.date;
+
+        if (!value) {
+          return <div>-</div>;
+        }
+
+        return (
+          <div className="text-xs sm:text-sm">
+            {formatMonobankShortDate(value)}
+          </div>
+        );
+      },
+    },
+    {
+      accessorKey: "destination",
+      header: ({ column }) => (
+        <SortableColumnHeader column={column} title={t("description")} />
+      ),
+      cell: ({ row }) => (
+        <div className="max-w-[8.5rem] truncate text-xs sm:max-w-72 sm:text-sm">
+          {row.original.destination ?? "-"}
+        </div>
+      ),
+    },
+    {
+      accessorKey: "maskedPan",
+      header: t("card"),
+      cell: ({ row }) => (
+        <div className="text-xs sm:text-sm">{row.original.maskedPan ?? "-"}</div>
+      ),
+    },
+    {
+      accessorKey: "reference",
+      header: ({ column }) => (
+        <SortableColumnHeader column={column} title={t("reference")} />
+      ),
+      cell: ({ row }) => (
+        <div className="max-w-[7rem] truncate font-mono text-[11px] sm:max-w-none sm:text-xs">
+          {row.original.reference?.split("-").at(-1) ?? "-"}
+        </div>
+      ),
+    },
+    {
+      accessorKey: "amount",
+      header: () => (
+        <div className="flex items-center justify-end gap-1.5 text-right">
+          {t("amount")}
+          <ColumnHint text={t("amountHint")} />
+        </div>
+      ),
+      cell: ({ row }) => (
+        <div className="text-right text-xs font-medium sm:text-sm">
+          {formatMonobankMoney(row.original.amount, row.original.ccy)}
+        </div>
+      ),
+    },
+    {
+      accessorKey: "profitAmount",
+      header: () => (
+        <div className="flex items-center justify-end gap-1.5 text-right">
+          {t("profit")}
+          <ColumnHint text={t("profitHint")} />
+        </div>
+      ),
+      cell: ({ row }) => (
+        <div className="text-right text-xs font-medium sm:text-sm">
+          {formatMonobankMoney(row.original.profitAmount, row.original.ccy)}
+        </div>
+      ),
+    },
+    {
+      accessorKey: "invoiceId",
+      header: ({ column }) => (
+        <SortableColumnHeader column={column} title={t("invoiceId")} />
+      ),
+      cell: ({ row }) => (
+        <div className="max-w-[7rem] truncate font-mono text-[11px] sm:max-w-none sm:text-xs">
+          {row.original.invoiceId ?? "-"}
+        </div>
+      ),
+    },
+    {
+      id: "details",
+      header: () => <span className="sr-only">{t("details")}</span>,
+      cell: ({ row, table }) => (
+        <div className="flex justify-end">
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon-xs"
+            data-row-interactive="true"
+            aria-label={t("openDetails", { id: row.original.invoiceId ?? row.original.reference ?? "payment" })}
+            onClick={(event) => {
+              event.stopPropagation();
+              table.options.meta?.onOpenPaymentDetails?.(row.original);
+            }}
+          >
+            <Eye />
+          </Button>
+        </div>
+      ),
+      enableSorting: false,
+      enableHiding: false,
+    },
+  ];
+}
+
+/** @deprecated Use createMonobankPaymentsColumns(t) instead */
+export const monobankPaymentsColumns: ColumnDef<StatementItem>[] = createMonobankPaymentsColumns((key, params) => {
+  const fallbacks: Record<string, string> = {
+    selectAll: "Select all",
+    selectRow: "Select row",
+    status: "Status",
+    date: "Date",
+    description: "Description",
+    card: "Card",
+    reference: "Reference",
+    amount: "Amount",
+    amountHint: "Amount the customer was originally charged on the invoice, before any conversion or fees.",
+    profit: "Profit",
+    profitHint: "Net amount you actually receive after Monobank's processing fee is deducted.",
+    invoiceId: "Invoice ID",
+    details: "Details",
+    openDetails: `Open details for ${params?.id ?? "payment"}`,
+  };
+  return fallbacks[key] ?? key;
+});

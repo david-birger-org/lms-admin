@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import type { FormEvent } from "react";
 import { useEffect, useState } from "react";
 
@@ -28,11 +29,11 @@ import { copyToClipboard } from "@/lib/clipboard";
 
 type SupportedCurrency = "UAH" | "USD";
 const DEFAULT_EXPIRATION_MINUTES = 24 * 60;
-const EXPIRATION_PRESETS = [
-  { label: "15 min", minutes: 15 },
-  { label: "1 hour", minutes: 60 },
-  { label: "24 hours", minutes: DEFAULT_EXPIRATION_MINUTES },
-] as const;
+const EXPIRATION_PRESET_KEYS = [
+  { key: "15min" as const, minutes: 15 },
+  { key: "1hour" as const, minutes: 60 },
+  { key: "24hours" as const, minutes: DEFAULT_EXPIRATION_MINUTES },
+];
 
 function formatExpirationPreview(validitySeconds: number) {
   if (!Number.isInteger(validitySeconds) || validitySeconds < 60) {
@@ -53,6 +54,7 @@ export function MonobankInvoiceForm({
 }: {
   onInvoiceCreated?: () => void;
 }) {
+  const t = useTranslations("admin.invoiceForm");
   const [customerName, setCustomerName] = useState("");
   const [description, setDescription] = useState("");
   const [redirectUrl, setRedirectUrl] = useState("");
@@ -102,7 +104,7 @@ export function MonobankInvoiceForm({
 
     try {
       if (!Number.isInteger(validitySeconds) || validitySeconds < 60) {
-        throw new Error("Expiration time must be at least 1 minute.");
+        throw new Error(t("expirationError"));
       }
 
       const response = await fetch("/api/monobank/invoice", {
@@ -127,7 +129,7 @@ export function MonobankInvoiceForm({
 
       if (!response.ok) {
         throw new Error(
-          data && "error" in data ? data.error : "Request failed",
+          data && "error" in data ? data.error : t("requestFailed"),
         );
       }
 
@@ -140,7 +142,7 @@ export function MonobankInvoiceForm({
       setIsCopied(copied);
     } catch (submitError) {
       const message =
-        submitError instanceof Error ? submitError.message : "Unexpected error";
+        submitError instanceof Error ? submitError.message : t("unexpectedError");
       setError(message);
     } finally {
       setIsSubmitting(false);
@@ -159,10 +161,8 @@ export function MonobankInvoiceForm({
   return (
     <Card className="shadow-xs">
       <CardHeader className="border-b px-3 sm:px-6">
-        <CardTitle>Generate payment link</CardTitle>
-        <CardDescription>
-          Create a Monobank invoice and copy the checkout link immediately.
-        </CardDescription>
+        <CardTitle>{t("title")}</CardTitle>
+        <CardDescription>{t("description")}</CardDescription>
       </CardHeader>
 
       <CardContent className="space-y-6 px-3 pb-3 pt-4 sm:px-6 sm:pb-6">
@@ -170,24 +170,24 @@ export function MonobankInvoiceForm({
           <div className="grid gap-5 lg:grid-cols-[1.2fr_0.8fr]">
             <div className="space-y-5">
               <div className="space-y-2">
-                <Label htmlFor="customerName">Customer name</Label>
+                <Label htmlFor="customerName">{t("customerName")}</Label>
                 <Input
                   className="h-9"
                   id="customerName"
                   value={customerName}
                   onChange={(event) => setCustomerName(event.target.value)}
-                  placeholder="John Doe"
+                  placeholder={t("customerNamePlaceholder")}
                   required
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="description">Description</Label>
+                <Label htmlFor="description">{t("descriptionLabel")}</Label>
                 <Textarea
                   id="description"
                   value={description}
                   onChange={(event) => setDescription(event.target.value)}
-                  placeholder="Payment for coaching package"
+                  placeholder={t("descriptionPlaceholder")}
                   className="min-h-28"
                   required
                 />
@@ -195,9 +195,9 @@ export function MonobankInvoiceForm({
 
               <div className="space-y-2">
                 <Label htmlFor="redirectUrl">
-                  Redirect URL{" "}
+                  {t("redirectUrl")}{" "}
                   <span className="text-muted-foreground font-normal">
-                    (optional)
+                    {t("optional")}
                   </span>
                 </Label>
                 <Input
@@ -214,7 +214,7 @@ export function MonobankInvoiceForm({
             <div className="rounded-lg border bg-muted/20 p-4">
               <div className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="amount">Amount</Label>
+                  <Label htmlFor="amount">{t("amount")}</Label>
                   <Input
                     className="h-9"
                     id="amount"
@@ -229,7 +229,7 @@ export function MonobankInvoiceForm({
                 </div>
 
                 <div className="space-y-2">
-                  <Label>Currency</Label>
+                  <Label>{t("currency")}</Label>
                   <Select
                     value={currency}
                     onValueChange={(value) =>
@@ -237,7 +237,7 @@ export function MonobankInvoiceForm({
                     }
                   >
                     <SelectTrigger className="h-9 w-full">
-                      <SelectValue placeholder="Select currency" />
+                      <SelectValue placeholder={t("selectCurrency")} />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="UAH">UAH</SelectItem>
@@ -248,7 +248,7 @@ export function MonobankInvoiceForm({
 
                 <div className="space-y-3">
                   <div className="space-y-2">
-                    <Label>Expires in</Label>
+                    <Label>{t("expiresIn")}</Label>
                     <ToggleGroup
                       value={[selectedExpirationPreset]}
                       onValueChange={(value) => {
@@ -260,13 +260,13 @@ export function MonobankInvoiceForm({
                       variant="outline"
                       className="grid w-full grid-cols-3 gap-2"
                     >
-                      {EXPIRATION_PRESETS.map((preset) => (
+                      {EXPIRATION_PRESET_KEYS.map((preset) => (
                         <ToggleGroupItem
                           key={preset.minutes}
                           value={String(preset.minutes)}
                           className="h-9 px-2 text-xs sm:text-sm"
                         >
-                          {preset.label}
+                          {t(`presets.${preset.key}`)}
                         </ToggleGroupItem>
                       ))}
                     </ToggleGroup>
@@ -275,10 +275,10 @@ export function MonobankInvoiceForm({
                   <div className="flex items-center justify-between gap-3 rounded-lg border bg-background/70 px-3 py-2">
                     <div className="space-y-0.5">
                       <Label htmlFor="customExpirationToggle">
-                        Use custom duration
+                        {t("useCustomDuration")}
                       </Label>
                       <p className="text-muted-foreground text-xs">
-                        Override the presets with a custom minute value.
+                        {t("useCustomDurationHint")}
                       </p>
                     </div>
                     <Switch
@@ -291,7 +291,7 @@ export function MonobankInvoiceForm({
                   {useCustomExpiration ? (
                     <div className="space-y-2">
                       <Label htmlFor="customExpirationMinutes">
-                        Custom duration (minutes)
+                        {t("customDurationLabel")}
                       </Label>
                       <Input
                         className="h-9"
@@ -311,14 +311,13 @@ export function MonobankInvoiceForm({
 
                   <div className="rounded-lg border bg-background/70 px-3 py-2">
                     <p className="text-muted-foreground text-[11px] font-medium uppercase tracking-[0.18em]">
-                      Expires at
+                      {t("expiresAt")}
                     </p>
                     <p className="mt-1 text-sm">
-                      {expiresAtPreview ?? "Enter at least 1 minute."}
+                      {expiresAtPreview ?? t("enterAtLeast1Minute")}
                     </p>
                     <p className="text-muted-foreground mt-1 text-xs">
-                      Default Monobank lifetime is 24 hours (
-                      {DEFAULT_EXPIRATION_MINUTES} minutes).
+                      {t("defaultLifetime", { minutes: DEFAULT_EXPIRATION_MINUTES })}
                     </p>
                   </div>
                 </div>
@@ -332,7 +331,7 @@ export function MonobankInvoiceForm({
               disabled={isSubmitting}
               className="h-9 min-w-32 px-3"
             >
-              {isSubmitting ? "Generating..." : "Generate invoice"}
+              {isSubmitting ? t("generating") : t("generateInvoice")}
             </Button>
             {result && (
               <Button
@@ -341,11 +340,11 @@ export function MonobankInvoiceForm({
                 className="h-9 px-3"
                 onClick={handleCopy}
               >
-                Copy link
+                {t("copyLink")}
               </Button>
             )}
             {isCopied && (
-              <span className="text-sm text-emerald-600">Copied</span>
+              <span className="text-sm text-emerald-600">{t("copied")}</span>
             )}
           </div>
 
@@ -360,7 +359,7 @@ export function MonobankInvoiceForm({
           <div className="rounded-lg border bg-muted/20 p-4">
             <div className="space-y-3">
               <p className="text-sm font-medium text-foreground">
-                Generated invoice
+                {t("generatedInvoice")}
               </p>
               {result.invoiceId && (
                 <p className="text-muted-foreground break-all font-mono text-xs">
@@ -377,7 +376,7 @@ export function MonobankInvoiceForm({
               </a>
               {result.expiresAt ? (
                 <p className="text-muted-foreground text-xs">
-                  Expires: {new Date(result.expiresAt).toLocaleString()}
+                  {t("expires")} {new Date(result.expiresAt).toLocaleString()}
                 </p>
               ) : null}
             </div>

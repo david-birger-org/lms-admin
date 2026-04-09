@@ -376,6 +376,196 @@
         }
       }
     },
+    "pendingInvoices": {
+      "title": "Очікуючі інвойси",
+      "description": "Інвойси, що очікують оплату з виписки Monobank. Скасуйте ті, що більше не потрібні.",
+      "refresh": "Оновити",
+      "loading": "Завантаження виписки...",
+      "empty": "Немає очікуючих інвойсів.",
+      "columns": {
+        "invoiceId": "ID інвойсу",
+        "description": "Опис",
+        "amount": "Сума",
+        "status": "Статус",
+        "date": "Дата"
+      },
+      "cancel": "Скасувати",
+      "cancelFailed": "Скасування не вдалося",
+      "cancelError": "Не вдалося скасувати інвойс"
+    },
+    "invoiceForm": {
+      "title": "Згенерувати посилання на оплату",
+      "description": "Створіть інвойс Monobank і одразу скопіюйте посилання для оплати.",
+      "customerName": "Ім'я клієнта",
+      "customerNamePlaceholder": "Іван Іванов",
+      "descriptionLabel": "Опис",
+      "descriptionPlaceholder": "Оплата за коучинг-пакет",
+      "redirectUrl": "URL переадресації",
+      "optional": "(необов'язково)",
+      "amount": "Сума",
+      "currency": "Валюта",
+      "selectCurrency": "Оберіть валюту",
+      "expiresIn": "Діє протягом",
+      "presets": {
+        "15min": "15 хв",
+        "1hour": "1 година",
+        "24hours": "24 години"
+      },
+      "useCustomDuration": "Користувацька тривалість",
+      "useCustomDurationHint": "Замініть пресети власним значенням у хвилинах.",
+      "customDurationLabel": "Тривалість (хвилини)",
+      "expiresAt": "Діє до",
+      "enterAtLeast1Minute": "Введіть щонайменше 1 хвилину.",
+      "defaultLifetime": "Стандартний термін дії Monobank — 24 години ({minutes} хвилин).",
+      "generating": "Генерація...",
+      "generateInvoice": "Згенерувати інвойс",
+      "copyLink": "Копіювати посилання",
+      "copied": "Скопійовано",
+      "generatedInvoice": "Згенерований інвойс",
+      "expires": "Діє до:",
+      "expirationError": "Термін дії має бути щонайменше 1 хвилина.",
+      "requestFailed": "Помилка запиту",
+      "unexpectedError": "Непередбачена помилка"
+    },
+    "paymentsTable": {
+      "title": "Історія оплат",
+      "description": "Шукайте у виписці, фільтруйте рядки та переглядайте деталі оплат на рівні інвойсів.",
+      "columns": {
+        "selectAll": "Виділити все",
+        "selectRow": "Виділити рядок",
+        "status": "Статус",
+        "date": "Дата",
+        "description": "Опис",
+        "card": "Картка",
+        "reference": "Референс",
+        "amount": "Сума",
+        "amountHint": "Сума, яку клієнт сплатив за інвойсом, до конвертації та комісій.",
+        "profit": "Прибуток",
+        "profitHint": "Чиста сума, яку ви отримуєте після вирахування комісії Monobank.",
+        "invoiceId": "ID інвойсу",
+        "details": "Деталі",
+        "openDetails": "Відкрити деталі для {id}"
+      },
+      "toolbar": {
+        "searchPlaceholder": "Пошук по будь-якому полю...",
+        "actions": "Дії",
+        "selected": "{count} обрано",
+        "exportCsv": "Експортувати обрані CSV",
+        "copyRawData": "Копіювати обрані дані",
+        "copyIds": "Копіювати обрані ID",
+        "clearSelection": "Зняти виділення",
+        "status": "Статус",
+        "filterStatus": "Фільтр статусу",
+        "columns": "Стовпці",
+        "columnLabels": {
+          "profitAmount": "прибуток",
+          "maskedPan": "картка",
+          "invoiceId": "id інвойсу"
+        },
+        "rows": "Рядки",
+        "refresh": "Оновити",
+        "reset": "Скинути"
+      },
+      "toasts": {
+        "copyIdsFailed": "Не вдалося скопіювати обрані ID.",
+        "copyIdsSuccess": "Обрані ID скопійовано.",
+        "copyRawFailed": "Не вдалося скопіювати обрані дані.",
+        "copyRawSuccess": "Обрані дані скопійовано.",
+        "exportSuccess": "Обрані рядки експортовано у CSV."
+      },
+      "stats": {
+        "total": "Всього:",
+        "settled": "Оплачено:"
+      },
+      "pagination": {
+        "rowsSelected": "{visible} із {filtered} рядків обрано.",
+        "rowsSelectedTotal": "{visible} із {filtered} видимих рядків обрано ({total} загалом).",
+        "previous": "Назад",
+        "next": "Далі"
+      },
+      "empty": {
+        "loading": "Завантаження результатів...",
+        "noVisibleResults": "Немає видимих результатів. Скиньте фільтри або очистіть пошук, щоб побачити всі рядки.",
+        "noResults": "Немає результатів.",
+        "resetTable": "Скинути таблицю"
+      }
+    },
+    "paymentDetails": {
+      "title": "Деталі оплати",
+      "loadingProvider": "Отримання останніх деталей оплати з Monobank...",
+      "loadingDatabase": "Завантаження останніх деталей оплати...",
+      "cancelInvoice": "Скасувати інвойс",
+      "cancelling": "Скасування...",
+      "openPaymentDetails": "Відкрити деталі оплати",
+      "loadingDetails": "Завантаження деталей оплати...",
+      "openPayment": "Відкрийте оплату, щоб переглянути деталі.",
+      "invoice": "Інвойс {id}",
+      "summary": {
+        "title": "Підсумок оплати",
+        "amount": "Сума",
+        "profitAmount": "Сума прибутку",
+        "description": "Опис",
+        "openCheckoutLink": "Відкрити посилання на оплату"
+      },
+      "quickFacts": {
+        "title": "Ключові дані",
+        "amount": "Сума",
+        "profitAmount": "Сума прибутку",
+        "card": "Картка"
+      },
+      "hints": {
+        "amount": "Сума, яку клієнт сплатив за інвойсом, до конвертації та комісій.",
+        "profitAmount": "Чиста сума, яку ви отримуєте після конвертації та комісії Monobank. Відповідає profitAmount у виписці Monobank.",
+        "fee": "Комісія Monobank. Вже вирахувана із суми прибутку.",
+        "country": "Країна випуску картки (ISO 3166)."
+      },
+      "statuses": {
+        "pending": "Очікування",
+        "cancelled": "Скасовано",
+        "expired": "Термін минув",
+        "failed": "Помилка",
+        "failure": "Збій",
+        "paid": "Оплачено",
+        "success": "Успішно",
+        "unknown": "Невідомо"
+      },
+      "labels": {
+        "created": "Створено",
+        "statementDate": "Дата виписки",
+        "updated": "Оновлено",
+        "bank": "Банк",
+        "paymentSystem": "Платіжна система",
+        "approvalCode": "Код авторизації",
+        "rrn": "RRN",
+        "terminal": "Термінал",
+        "transactionId": "ID транзакції",
+        "fee": "Комісія",
+        "country": "Країна",
+        "customer": "Клієнт",
+        "expires": "Діє до",
+        "reference": "Референс"
+      },
+      "failureReason": "Причина збою",
+      "errorCode": "Код помилки"
+    },
+    "dateRangePicker": {
+      "reset": "Скинути",
+      "maxDays": "Максимум {days} днів на запит.",
+      "daysSelected": "{days} день/днів обрано",
+      "selectDates": "Оберіть початкову та кінцеву дату.",
+      "apply": "Застосувати"
+    },
+    "paymentsHistory": {
+      "titles": {
+        "database": "Історія оплат",
+        "provider": "Виписка провайдера"
+      },
+      "descriptions": {
+        "database": "Канонічна історія оплат із таблиці payments. Використовуйте сторінку аудиту виписки для звірки з live-випискою Monobank.",
+        "provider": "Перевіряйте live-виписку Monobank для звірки на стороні провайдера."
+      },
+      "lastSynced": "Останнє оновлення {time}."
+    },
     "paymentsChart": {
       "title": "Динаміка оплат",
       "badge": "Таблиця оплат",

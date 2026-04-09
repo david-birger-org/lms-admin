@@ -1,38 +1,31 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+
 import { DateRangePicker } from "@/components/admin/DateRangePicker";
 import { MonobankPaymentsDataTable } from "@/components/admin/MonobankPaymentsDataTable";
 import { usePaymentsFeed } from "@/components/admin/PaymentsDataProvider";
 import type { PaymentDetailsSource } from "@/lib/payments";
 
-const defaultTitles: Record<PaymentDetailsSource, string> = {
-  database: "Payment history",
-  provider: "Provider statement",
-};
-
-const defaultDescriptions: Record<PaymentDetailsSource, string> = {
-  database:
-    "Canonical app payment history from the payments table. Use the statement audit page to reconcile against the live Monobank feed.",
-  provider:
-    "Inspect the live Monobank statement feed for provider-side reconciliation.",
-};
-
 function buildDescription({
   description,
   lastFetchedAt,
   source,
+  defaultDescription,
+  lastSyncedLabel,
 }: {
   description?: string;
   lastFetchedAt: number | null;
   source: PaymentDetailsSource;
+  defaultDescription: string;
+  lastSyncedLabel: (params: { time: string }) => string;
 }) {
-  const baseDescription = description ?? defaultDescriptions[source];
+  const baseDescription = description ?? defaultDescription;
 
-  if (source !== "database" || !lastFetchedAt) {
+  if (source !== "database" || !lastFetchedAt)
     return baseDescription;
-  }
 
-  return `${baseDescription} Last synced ${new Date(lastFetchedAt).toLocaleTimeString()}.`;
+  return `${baseDescription} ${lastSyncedLabel({ time: new Date(lastFetchedAt).toLocaleTimeString() })}`;
 }
 
 export function PaymentsHistoryTable({
@@ -44,6 +37,7 @@ export function PaymentsHistoryTable({
   title?: string;
   description?: string;
 }) {
+  const t = useTranslations("admin.paymentsHistory");
   const { state, actions, meta } = usePaymentsFeed(source);
   const maxDays = source === "provider" ? 31 : undefined;
 
@@ -68,11 +62,13 @@ export function PaymentsHistoryTable({
         onRefresh={() => void actions.refresh()}
         onInvoiceChanged={() => void actions.refresh()}
         detailsSource={source}
-        title={title ?? defaultTitles[source]}
+        title={title ?? t(`titles.${source}`)}
         description={buildDescription({
           description,
           lastFetchedAt: meta.lastFetchedAt,
           source,
+          defaultDescription: t(`descriptions.${source}`),
+          lastSyncedLabel: (params) => t("lastSynced", params),
         })}
       />
     </div>
