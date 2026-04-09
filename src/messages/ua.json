@@ -391,6 +391,7 @@
       },
       "cancel": "Скасувати",
       "cancelFailed": "Скасування не вдалося",
+      "cancelConfirm": "Скасувати цей неоплачений інвойс? Цю дію не можна скасувати.",
       "cancelError": "Не вдалося скасувати інвойс"
     },
     "invoiceForm": {
@@ -424,8 +425,19 @@
       "generatedInvoice": "Згенерований інвойс",
       "expires": "Діє до:",
       "expirationError": "Термін дії має бути щонайменше 1 хвилина.",
+      "checking": "Перевірка...",
       "requestFailed": "Помилка запиту",
-      "unexpectedError": "Непередбачена помилка"
+      "unexpectedError": "Непередбачена помилка",
+      "duplicateDialog": {
+        "title": "Знайдено існуючі інвойси",
+        "description": "Знайдено {count, plural, one {# інвойс} few {# інвойси} other {# інвойсів}} для \"{name}\" за останні 30 днів.",
+        "date": "Дата",
+        "descriptionCol": "Опис",
+        "amount": "Сума",
+        "status": "Статус",
+        "cancel": "Скасувати",
+        "confirm": "Створити все одно"
+      }
     },
     "paymentsTable": {
       "title": "Історія оплат",

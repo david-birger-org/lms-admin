@@ -391,6 +391,7 @@
       },
       "cancel": "Cancel",
       "cancelFailed": "Cancel failed",
+      "cancelConfirm": "Cancel this unpaid invoice? This action cannot be undone.",
       "cancelError": "Failed to cancel invoice"
     },
     "invoiceForm": {
@@ -424,8 +425,19 @@
       "generatedInvoice": "Generated invoice",
       "expires": "Expires:",
       "expirationError": "Expiration time must be at least 1 minute.",
+      "checking": "Checking...",
       "requestFailed": "Request failed",
-      "unexpectedError": "Unexpected error"
+      "unexpectedError": "Unexpected error",
+      "duplicateDialog": {
+        "title": "Existing invoices found",
+        "description": "{count, plural, one {# invoice} other {# invoices}} found for \"{name}\" in the last 30 days.",
+        "date": "Date",
+        "descriptionCol": "Description",
+        "amount": "Amount",
+        "status": "Status",
+        "cancel": "Cancel",
+        "confirm": "Create anyway"
+      }
     },
     "paymentsTable": {
       "title": "Payments history",

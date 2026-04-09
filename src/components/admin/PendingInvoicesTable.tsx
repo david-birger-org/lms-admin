@@ -100,6 +100,8 @@ export function PendingInvoicesTable() {
   );
 
   const handleCancel = useCallback(async (invoiceId: string) => {
+    if (!window.confirm(t("cancelConfirm"))) return;
+
     setCancellingId(invoiceId);
     setError(null);
 
