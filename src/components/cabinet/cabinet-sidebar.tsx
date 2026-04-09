@@ -14,12 +14,10 @@ import type { DashboardAccount } from "@/lib/dashboard-account";
 
 export function CabinetSidebar({
   account,
-  activeFeatures,
   showAdminLink = false,
   ...props
 }: ComponentProps<typeof Sidebar> & {
   account: DashboardAccount;
-  activeFeatures: string[];
   showAdminLink?: boolean;
 }) {
   const t = useTranslations("navigation.cabinet");
@@ -43,7 +41,7 @@ export function CabinetSidebar({
         </div>
       </SidebarHeader>
       <SidebarContent>
-        <CabinetNavigation label={t("label")} activeFeatures={activeFeatures} />
+        <CabinetNavigation label={t("label")} />
       </SidebarContent>
       <SidebarFooter className="border-t border-sidebar-border/60">
         <AccountMenu
