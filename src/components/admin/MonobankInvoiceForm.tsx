@@ -77,7 +77,7 @@ interface DuplicateInvoice {
 
 async function fetchDuplicates(customerName: string) {
   const response = await fetch(
-    `/api/payments/duplicates?customerName=${encodeURIComponent(customerName)}`,
+    `/api/payments/history?customerName=${encodeURIComponent(customerName)}`,
     { cache: "no-store" },
   );
 
