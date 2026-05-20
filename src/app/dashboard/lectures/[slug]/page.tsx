@@ -4,10 +4,12 @@ import { getTranslations } from "next-intl/server";
 import { Suspense } from "react";
 
 import { CabinetSection } from "@/components/cabinet/cabinet-page-shell";
-import { LazyLectureReader } from "@/components/cabinet/lazy-lecture-reader";
+import { LecturePreview } from "@/components/cabinet/lecture-preview";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Link } from "@/i18n/routing";
 import { requireAuthPageAccess } from "@/lib/auth/auth-server";
+import { getLectureMeta } from "@/lib/server/lecture-renderer";
 import { getActiveFeatures } from "@/lib/server/user-features";
 import { getUserLecture } from "@/lib/server/user-lectures";
 
@@ -23,7 +25,7 @@ async function LectureContent({ slug }: { slug: string }) {
   const lecture = await getUserLecture(slug);
   if (!lecture) notFound();
 
-  const watermarkText = "David Birger";
+  const meta = await getLectureMeta(slug, access.authenticatedUser);
 
   return (
     <CabinetSection>
@@ -36,23 +38,20 @@ async function LectureContent({ slug }: { slug: string }) {
           {t("backToList")}
         </Link>
       </div>
-      <div className="rounded-xl border bg-card shadow-xs">
-        <h1 className="mb-6 px-4 pt-4 text-xl font-semibold tracking-tight sm:text-2xl md:px-8 md:pt-8">
-          {lecture.title}
-        </h1>
-        <Suspense
-          fallback={
-            <Skeleton className="h-[600px] w-full rounded-xl" />
-          }
-        >
-          <div className="md:px-8 md:pb-8">
-            <LazyLectureReader
-              pdfBase64={lecture.pdfBase64}
-              watermarkText={watermarkText}
-            />
-          </div>
-        </Suspense>
-      </div>
+      <Card size="sm">
+        <CardHeader>
+          <CardTitle className="text-lg sm:text-xl">{lecture.title}</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <LecturePreview
+            slug={slug}
+            pageCount={meta.pageCount}
+            pageWidth={meta.pageWidth}
+            pageHeight={meta.pageHeight}
+            watermarkText="David Birger"
+          />
+        </CardContent>
+      </Card>
     </CabinetSection>
   );
 }
@@ -65,11 +64,11 @@ export default async function LectureDetailPage({
   const { slug } = await params;
 
   return (
-    <div className="@container/main mx-auto flex w-full max-w-[1200px] flex-1 flex-col gap-4 py-4 md:gap-6 md:py-6">
+    <div className="@container/main mx-auto flex w-full max-w-[900px] flex-1 flex-col gap-4 px-3 py-4 sm:px-4 md:gap-6 md:py-6">
       <Suspense
         fallback={
           <CabinetSection>
-            <Skeleton className="h-[500px] w-full rounded-xl" />
+            <Skeleton className="h-[500px] w-full rounded-4xl" />
           </CabinetSection>
         }
       >

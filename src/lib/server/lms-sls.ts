@@ -113,15 +113,17 @@ export async function forwardLmsSlsRequest({
     cache: "no-store",
   });
 
-  const responseBody = await response.text();
   const responseHeaders = new Headers();
-  const responseContentType = response.headers.get("content-type");
-
-  if (responseContentType) {
-    responseHeaders.set("content-type", responseContentType);
+  for (const name of [
+    "content-type",
+    "content-disposition",
+    "content-length",
+  ]) {
+    const value = response.headers.get(name);
+    if (value) responseHeaders.set(name, value);
   }
 
-  return new Response(responseBody, {
+  return new Response(response.body, {
     status: response.status,
     headers: responseHeaders,
   });
